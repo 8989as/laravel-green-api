@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
     plugins: [
-        laravel(['resources/js/index.jsx']),  // Change entry point
+        laravel(['resources/js/main.jsx']),  // Change entry point
         react({
             include: '**/*.jsx',
             fastRefresh: true, // Explicitly enable fast refresh

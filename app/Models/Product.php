@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Category;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Product extends Model implements HasMedia
 {
@@ -31,7 +32,7 @@ class Product extends Model implements HasMedia
         'is_gift' => 'boolean',
     ];
 
-    protected $appends = ['current_price', 'main_image', 'gallery_images', 'has_discount'];
+    protected $appends = ['current_price', 'main_image', 'gallery_images', 'all_images', 'has_discount'];
 
     public function scopeFilter(Builder $query, array $filters)
     {
@@ -93,14 +94,50 @@ class Product extends Model implements HasMedia
     public function getMainImageAttribute()
     {
         $mainImage = $this->getFirstMediaUrl('products');
-        return $mainImage ?: '/assets/images/placeholder-product.jpg';
+        return $mainImage ?: null;
     }
 
     public function getGalleryImagesAttribute()
     {
         return $this->getMedia('gallery')->map(function ($media) {
-            return $media->getUrl();
+            return [
+                'id' => $media->id,
+                'url' => $media->getUrl(),
+                'name' => $media->name,
+                'size' => $media->size,
+            ];
         })->toArray();
+    }
+
+    public function getAllImagesAttribute()
+    {
+        $images = [];
+        
+        // Add main image
+        $mainImage = $this->getFirstMedia('products');
+        if ($mainImage) {
+            $images[] = [
+                'id' => $mainImage->id,
+                'url' => $mainImage->getUrl(),
+                'name' => $mainImage->name,
+                'size' => $mainImage->size,
+                'type' => 'main'
+            ];
+        }
+        
+        // Add gallery images
+        $galleryImages = $this->getMedia('gallery');
+        foreach ($galleryImages as $media) {
+            $images[] = [
+                'id' => $media->id,
+                'url' => $media->getUrl(),
+                'name' => $media->name,
+                'size' => $media->size,
+                'type' => 'gallery'
+            ];
+        }
+        
+        return $images;
     }
 
     // Relationships
@@ -134,9 +171,28 @@ class Product extends Model implements HasMedia
     {
         $this->addMediaCollection('products')
              ->useDisk('public')
-             ->singleFile(); // For main image
+             ->singleFile() // For main image
+             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
              
         $this->addMediaCollection('gallery')
-             ->useDisk('public');
+             ->useDisk('public')
+             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+    }
+
+    public function registerMediaConversions(Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+              ->width(300)
+              ->height(300)
+              ->sharpen(10)
+              ->optimize()
+              ->nonQueued();
+              
+        $this->addMediaConversion('medium')
+              ->width(600)
+              ->height(600)
+              ->sharpen(10)
+              ->optimize()
+              ->nonQueued();
     }
 }
