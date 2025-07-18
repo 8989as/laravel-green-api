@@ -1,0 +1,74 @@
+/* Events Section Custom Styles */
+.events-section {
+  direction: rtl;
+  /* background: #000; */
+  color: #224921;
+}
+.events-title {
+  color: #224921;
+  font-family: 'El Messiri', sans-serif;
+  font-weight: 600;
+  font-size: 2.25rem;
+}
+.events-desc {
+  color: #6F816E;
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1.25rem;
+}
+.events-list li {
+  color: #6F816E;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  font-family: 'El Messiri', sans-serif;
+}
+.events-img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  min-height: 220px;
+  aspect-ratio: 4/3;
+  border-radius: 15px;
+}
+.events-form {
+  background: #fff;
+  border: 1px solid #A6C7A5;
+  box-shadow: 0 2px 16px 0 rgba(34, 73, 33, 0.08);
+}
+.events-label {
+  color: #224921;
+  font-weight: 600;
+  font-family: 'El Messiri', sans-serif;
+}
+.events-input {
+  border: 1px solid #BDC5BC;
+  border-radius: 5px;
+  background: #ECF3EC;
+  color: #224921;
+  font-family: 'El Messiri', sans-serif;
+}
+.events-input:focus {
+  border-color: #3D853C;
+  box-shadow: 0 0 0 0.2rem rgba(61, 133, 60, 0.15);
+}
+.events-btn {
+  background: #3D853C;
+  color: #ECF3EC;
+  font-family: 'El Messiri', sans-serif;
+  font-weight: 500;
+  border-radius: 5px;
+  transition: background 0.2s;
+}
+.events-btn:hover {
+  background: #224921;
+  color: #ECF3EC;
+}
+@media (max-width: 991.98px) {
+  .events-title {
+    font-size: 1.5rem;
+  }
+  .events-img {
+    min-height: 160px;
+    aspect-ratio: 16/9;
+  }
+}

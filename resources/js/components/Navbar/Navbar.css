@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #3D853C;
+  --primary-bg: #ECF3EC;
+  --text-color: #6F816E;
+  --border-color: #C3D9C3;
+  --placeholder-color: #BDC5BC;
+}
+
+/* Color, font, and minor tweaks only. Layout is handled by Bootstrap. */
+
+body {
+  font-family: 'El Messiri', sans-serif;
+}
+
+.menu-link {
+  color: var(--text-color);
+  font-size: 16px;
+  font-family: 'El Messiri', sans-serif;
+  font-weight: 400;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.menu-link:hover {
+  color: var(--primary-color);
+}
+.menu-link.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.MasaratcoLogo1 {
+  width: 138px;
+  height: 80px;
+}
+
+.icon-frame {
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  background: var(--primary-bg);
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.icon-frame:hover {
+  background: #d8e6d8;
+}
+
+.cart-badge {
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 20px;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 2;
+}
+.cart-badge.animated {
+  animation: pop 0.5s;
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.categories-label {
+  color: var(--primary-color);
+  font-size: 16px;
+  font-family: 'El Messiri', sans-serif;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.categories-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--primary-color);
+}
+
+.category-frame {
+  background: var(--primary-bg);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  padding: 12px 24px;
+  margin-right: 0;
+  margin-left: 0;
+}
+.category-frame:hover {
+  background: #d8e6d8;
+}
+.category-text {
+  color: var(--primary-color);
+  font-size: 16px;
+  font-family: 'El Messiri', sans-serif;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+/* Custom classes for Figma design */
+.custom-navbar-bg {
+  background: var(--primary-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.search-bar-box {
+  width: 316px;
+  height: 44px;
+  border-radius: 5px;
+  border: 1px solid #d2d8d2;
+  background: #fff;
+  position: relative;
+}
+.search-bar-inner {
+  width: 100%;
+  height: 100%;
+  padding: 0 10px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--placeholder-color);
+}
+.search-input {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 16px;
+  color: var(--placeholder-color);
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+.category-all-frame {
+  background: var(--primary-bg);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+}
+
+/* Responsive adjustments for Figma match */
+@media (max-width: 1280px) {
+  .custom-navbar-bg, .container-fluid {
+    max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .search-bar-box {
+    width: 100%;
+    min-width: 200px;
+  }
+}
+@media (max-width: 992px) {
+  .search-bar-box {
+    display: none !important;
+  }
+}
+@media (max-width: 768px) {
+  .category-frame, .category-all-frame {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}

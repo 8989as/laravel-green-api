@@ -1,0 +1,96 @@
+.image-container {
+  width: 429px;
+  height: 604px;
+  position: relative;
+  background-color: white;
+}
+
+.image-layer {
+  width: 369px;
+  height: 487.2px;
+  left: 34px;
+  top: 116.8px;
+  position: absolute;
+  overflow: hidden;
+  border-top-left-radius: 110px;
+  border-top-right-radius: 110px;
+}
+
+.background-layer {
+  width: 369px;
+  height: 487.39px;
+  left: 0;
+  top: 0;
+  position: absolute;
+  /* background: #ecf3ec; */
+  border-top-left-radius: 110px;
+  border-top-right-radius: 110px;
+  background-image: url('assets/images/pattern.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-image {
+  width: 369px;
+  height: 487px;
+  left: 0;
+  top: 0.2px;
+  position: absolute;
+  border-top-left-radius: 109px;
+  border-top-right-radius: 109px;
+}
+
+.rotated-image {
+  width: 312.82px;
+  height: 590.28px;
+  left: 60px;
+  /* top: 590.28px; */
+  position: absolute;
+  /* transform: rotate(180deg); */
+  transform-origin: top left;
+  z-index: 2;
+}
+
+.label {
+  height: 43.98px;
+  padding: 10px 24px;
+  left: 0;
+  position: absolute;
+  background: rgba(195, 217, 195, 0.5);
+  border-radius: 50px;
+  backdrop-filter: blur(5px);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: #224921;
+  font-size: 24px;
+  font-family: 'El Messiri', sans-serif;
+  font-weight: 500;
+  line-height: 24px;
+  word-wrap: break-word;
+  white-space: nowrap;
+  text-align: center;
+  z-index: 3;
+}
+
+.quality {
+  top: 289.89px;
+  left: 0;
+}
+
+.delivery {
+  top: 338.87px;
+  left: 259px;
+}
+
+.after-sales {
+  top: 482.81px;
+  left: 59px;
+}

@@ -1,0 +1,40 @@
+/* Cart Badge Styles */
+.cart-icon-wrapper {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #FF6B6B;
+  color: white;
+  font-size: 10px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+/* RTL adjustment for the badge */
+.rtl .cart-badge {
+  right: auto;
+  left: -5px;
+}
+
+/* Pulse animation for new items */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

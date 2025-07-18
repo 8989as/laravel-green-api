@@ -1,0 +1,109 @@
+/* Frame1984078445.css */
+
+@import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;600;700&display=swap');
+
+.rtl-root {
+  direction: rtl;
+  font-family: 'El Messiri', sans-serif;
+}
+
+/* For LTR mode */
+.text-start .main-title,
+.text-start .main-desc,
+.text-start .section-title {
+  text-align: left !important;
+}
+
+.frame1984078445 {
+  background: #fff;
+}
+
+.gap-100 {
+  row-gap: 100px !important;
+}
+
+.main-title {
+  color: #224921;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: right;
+  width: 100%;
+  font-family: 'El Messiri', sans-serif;
+}
+
+.main-desc {
+  color: #6F816E;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: right;
+  width: 100%;
+  font-family: 'El Messiri', sans-serif;
+}
+
+.section-title {
+  color: #224921;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: right;
+  width: 100%;
+  font-family: 'El Messiri', sans-serif;
+}
+
+.categories-card {
+  width: 302px;
+  min-width: 302px;
+  background: #ECF3EC;
+  border-radius: 15px !important;
+  gap: 32px !important;
+  box-sizing: border-box;
+}
+
+.category-title {
+  color: #3D853C;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  font-family: 'El Messiri', sans-serif;
+}
+
+.category-desc {
+  color: #6F816E;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  font-family: 'El Messiri', sans-serif;
+}
+
+.bg-custom-card {
+  background: #ECF3EC !important;
+}
+
+.icon svg {
+  display: block;
+}
+
+/* Responsive tweaks */
+@media (max-width: 1200px) {
+  .main-title, .main-desc, .section-title {
+    font-size: 28px;
+  }
+  .categories-card {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .frame1984078445 > .d-flex.flex-column {
+    gap: 40px !important;
+  }
+  .main-title, .section-title {
+    font-size: 22px;
+  }
+  .main-desc {
+    font-size: 16px;
+  }
+}

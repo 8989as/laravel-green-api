@@ -1,0 +1,46 @@
+.breadcrumb-container {
+  background-color: #ECF3EC;
+  border-radius: 5px;
+  padding: 16px 80px;
+  width: 100%;
+  direction: ltr;
+}
+
+.breadcrumb-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+[dir="rtl"] .breadcrumb-wrapper {
+  justify-content: flex-end;
+}
+
+.breadcrumb-item {
+  font-size: 18px;
+  font-family: 'El Messiri', sans-serif;
+  line-height: 24.3px;
+  color: #7DAD7C;
+  font-weight: 400;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.breadcrumb-item.active {
+  color: #3D853C;
+  font-weight: 700;
+}
+
+.breadcrumb-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.breadcrumb-separator img {
+  display: block;
+}
+
+[dir="rtl"] .breadcrumb-separator img {
+  transform: rotate(180deg) scaleY(-1);
+}

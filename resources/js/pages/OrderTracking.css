@@ -1,0 +1,94 @@
+/* Order Tracking Styles */
+
+.tracking-timeline {
+  position: relative;
+  margin-top: 2rem;
+  padding-left: 2.5rem;
+}
+
+.tracking-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.75rem;
+  width: 2px;
+  background-color: #e0e0e0;
+}
+
+.tracking-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.tracking-icon {
+  position: absolute;
+  left: -2.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tracking-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+}
+
+.tracking-content {
+  padding-left: 0.5rem;
+}
+
+/* RTL support for tracking */
+.rtl .tracking-timeline {
+  padding-left: 0;
+  padding-right: 2.5rem;
+}
+
+.rtl .tracking-timeline::before {
+  left: auto;
+  right: 0.75rem;
+}
+
+.rtl .tracking-icon {
+  left: auto;
+  right: -2.5rem;
+}
+
+.rtl .tracking-content {
+  padding-left: 0;
+  padding-right: 0.5rem;
+}
+
+/* Order card hover effect */
+.order-card {
+  transition: transform 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Status badge animation */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.badge-animated {
+  animation: pulse 1.5s infinite;
+}
+
+/* Button styles */
+.btn-track {
+  background-color: #28503E;
+  border-color: #28503E;
+}
+
+.btn-track:hover {
+  background-color: #1E3A2D;
+  border-color: #1E3A2D;
+}

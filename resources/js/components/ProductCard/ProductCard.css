@@ -1,0 +1,151 @@
+.product-card {
+  font-family: 'El Messiri', sans-serif;
+}
+
+.product-card .card {
+  border: none;
+  background: transparent;
+}
+
+.product-image-wrapper {
+  position: relative;
+  height: 302px;
+  padding: 24px;
+  background: #ECF3EC;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 182px;
+  height: 190px;
+  object-fit: contain;
+  transition: transform 0.3s ease-in-out;
+  transform-origin: center center;
+}
+
+.product-image-wrapper:hover .product-image {
+  transform: scale(1.5);
+}
+
+.favorite-button {
+  padding: 10px;
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  background: #F8FFF8;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 4px;
+  background: #F8FFF8;
+  border: none;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.favorite-btn svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.favorite-btn:hover {
+  background: #FB6487;
+}
+
+.favorite-btn.active {
+  background: #FB6487;
+}
+
+.favorite-btn.active i {
+  color: #F8FFF8;
+}
+
+.product-title {
+  color: #224921;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.product-subtitle {
+  color: #7DAD7C;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.price-symbol {
+  color: #9FAB9E;
+  font-size: 16px;
+  font-weight: 500;
+  /* padding: 0 4px; */
+  /* border-radius: 2px; */
+}
+
+.product-price {
+  color: #FB6487;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.btn-primary {
+  background-color: #3D853C;
+  border-color: #3D853C;
+  height: 35px;
+  padding: 10px;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: #2D632C !important;
+  border-color: #2D632C !important;
+}
+
+.btn-outline-primary {
+  color: #3D853C;
+  border-color: #3D853C;
+  background-color: #ECF3EC;
+  height: 35px;
+  padding: 10px;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+  background-color: #3D853C !important;
+  border-color: #3D853C !important;
+  color: #ECF3EC !important;
+}
+
+.btn i {
+  font-size: 16px;
+}

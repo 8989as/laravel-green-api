@@ -1,0 +1,253 @@
+/* Cart Page Styles */
+.cart-page-container {
+  font-family: 'El Messiri', sans-serif;
+}
+
+/* RTL specific styles */
+.cart-page-container.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.cart-page-container.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+.cart-title {
+  font-weight: 600;
+  color: #28503E;
+}
+
+/* Cart items card */
+.cart-items-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.cart-header {
+  color: #6B7280;
+  font-weight: 600;
+}
+
+/* Cart item */
+.cart-item {
+  position: relative;
+}
+
+.cart-item-image-container {
+  width: 80px;
+  height: 80px;
+  background: #ECF3EC;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+}
+
+.cart-item-image {
+  max-width: 70px;
+  max-height: 70px;
+  object-fit: contain;
+}
+
+.cart-item-details h5 {
+  font-weight: 600;
+  color: #28503E;
+  font-size: 1rem;
+}
+
+/* Price display */
+.price-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #28503E;
+}
+
+.price-symbol-img {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  margin-left: 4px;
+}
+
+.subtotal-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #28503E;
+}
+
+/* Quantity controls */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+  width: 110px;
+  margin: 0 auto;
+}
+
+.quantity-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f8f8;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.quantity-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantity-input {
+  width: 40px;
+  height: 32px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  -moz-appearance: textfield;
+}
+
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove button */
+.remove-item-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  color: #9CA3AF;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
+.cart-page-container.rtl .remove-item-btn {
+  right: auto;
+  left: 0;
+}
+
+.remove-item-btn:hover {
+  color: #EF4444;
+}
+
+/* Empty cart */
+.empty-cart {
+  padding: 2rem;
+}
+
+.empty-cart-icon {
+  font-size: 3rem;
+  color: #9CA3AF;
+}
+
+/* Cart Summary */
+.cart-summary-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background-color: #F8FFF8;
+}
+
+.cart-summary-card .card-title {
+  font-weight: 600;
+  color: #28503E;
+  font-size: 1.25rem;
+}
+
+.summary-item {
+  color: #6B7280;
+}
+
+.summary-total {
+  font-size: 1.1rem;
+}
+
+.total-price {
+  font-weight: 700;
+  color: #28503E;
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+}
+
+/* Payment methods */
+.payment-methods {
+  margin-top: 2rem;
+}
+
+.payment-icon {
+  width: 40px;
+  height: 25px;
+  background-color: #fff;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.payment-icon i {
+  font-size: 1.2rem;
+  color: #6B7280;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #28503E;
+  border-color: #28503E;
+}
+
+.btn-primary:hover {
+  background-color: #1E3A2D;
+  border-color: #1E3A2D;
+}
+
+.btn-outline-primary {
+  color: #28503E;
+  border-color: #28503E;
+}
+
+.btn-outline-primary:hover {
+  background-color: #28503E;
+  border-color: #28503E;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .cart-item {
+    padding-bottom: 1rem;
+  }
+  
+  .quantity-control {
+    width: 100px;
+  }
+}
+
+/* Make price fields rtl-aware */
+.rtl .price-display, 
+.rtl .subtotal-display,
+.rtl .total-price {
+  flex-direction: row-reverse;
+}

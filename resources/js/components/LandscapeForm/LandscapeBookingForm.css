@@ -1,0 +1,129 @@
+/* LandscapeBookingForm.css */
+.landscape-booking-form-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  font-family: 'El Messiri', sans-serif;
+  direction: rtl;
+  background: #fff;
+  padding: 32px 16px;
+}
+.landscape-booking-form-container.ltr {
+  direction: ltr;
+}
+.form-header {
+  margin-bottom: 24px;
+}
+.form-title {
+  color: #224921;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 16px;
+  text-align: right;
+}
+.form-subtitle {
+  color: #6F816E;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: justify;
+}
+.form-content {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+.form-fields {
+  flex: 1;
+  min-width: 0;
+}
+.form-image {
+  width: 481px;
+  min-width: 260px;
+  max-width: 100%;
+}
+.form-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 15px;
+  object-fit: cover;
+}
+.submit-row {
+  margin-top: 32px;
+  display: flex;
+  justify-content: flex-end;
+}
+.submit-button {
+  height: 35px;
+  padding: 0 32px;
+  background: #3D853C;
+  color: #ECF3EC;
+  border: none;
+  border-radius: 5px;
+  font-family: 'El Messiri', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.submit-button:disabled {
+  background: #a5cfa4;
+  cursor: not-allowed;
+}
+.form-label {
+  color: #224921;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: right;
+}
+.form-control,
+.form-select {
+  border: 1px solid #D2D8D2 !important;
+  border-radius: 5px !important;
+  color: #6F816E;
+  font-family: 'El Messiri', sans-serif;
+  font-size: 16px;
+  background: #fff;
+  text-align: right;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: #3D853C !important;
+  box-shadow: 0 0 0 2px #ecf3ec55;
+}
+textarea.form-control {
+  min-height: 78px;
+  resize: none;
+}
+.is-invalid {
+  border-color: #dc3545 !important;
+}
+.invalid-feedback {
+  text-align: right;
+}
+@media (max-width: 900px) {
+  .form-content {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .form-image {
+    width: 100%;
+    min-width: 0;
+    margin-top: 24px;
+  }
+}
+@media (max-width: 600px) {
+  .form-title {
+    font-size: 24px;
+  }
+  .form-subtitle {
+    font-size: 16px;
+  }
+  .form-content {
+    gap: 12px;
+  }
+}
