@@ -103,8 +103,12 @@ class Product extends Model implements HasMedia
             return [
                 'id' => $media->id,
                 'url' => $media->getUrl(),
+                'thumb_url' => $media->getUrl('thumb'),
+                'medium_url' => $media->getUrl('medium'),
+                'large_url' => $media->getUrl('large'),
                 'name' => $media->name,
                 'size' => $media->size,
+                'mime_type' => $media->mime_type,
             ];
         })->toArray();
     }
@@ -119,8 +123,12 @@ class Product extends Model implements HasMedia
             $images[] = [
                 'id' => $mainImage->id,
                 'url' => $mainImage->getUrl(),
+                'thumb_url' => $mainImage->getUrl('thumb'),
+                'medium_url' => $mainImage->getUrl('medium'),
+                'large_url' => $mainImage->getUrl('large'),
                 'name' => $mainImage->name,
                 'size' => $mainImage->size,
+                'mime_type' => $mainImage->mime_type,
                 'type' => 'main'
             ];
         }
@@ -131,8 +139,12 @@ class Product extends Model implements HasMedia
             $images[] = [
                 'id' => $media->id,
                 'url' => $media->getUrl(),
+                'thumb_url' => $media->getUrl('thumb'),
+                'medium_url' => $media->getUrl('medium'),
+                'large_url' => $media->getUrl('large'),
                 'name' => $media->name,
                 'size' => $media->size,
+                'mime_type' => $media->mime_type,
                 'type' => 'gallery'
             ];
         }
@@ -166,6 +178,100 @@ class Product extends Model implements HasMedia
         return $this->belongsToMany(Size::class, 'product_attributes', 'product_id', 'size_id');
     }
 
+    // Additional media helper methods
+    public function getMainImageUrl($conversion = null)
+    {
+        $media = $this->getFirstMedia('products');
+        if (!$media) {
+            return null;
+        }
+
+        try {
+            return $conversion ? $media->getUrl($conversion) : $media->getUrl();
+        } catch (\Exception $e) {
+            // Fallback to original if conversion fails
+            return $media->getUrl();
+        }
+    }
+
+    public function getMainImageUrlWithFallback($conversion = 'medium', $fallback = null)
+    {
+        $url = $this->getMainImageUrl($conversion);
+        return $url ?: $fallback;
+    }
+
+    public function hasMainImage()
+    {
+        return $this->getFirstMedia('products') !== null;
+    }
+
+    public function hasGalleryImages()
+    {
+        return $this->getMedia('gallery')->isNotEmpty();
+    }
+
+    public function getGalleryImageUrls($conversion = null)
+    {
+        return $this->getMedia('gallery')->map(function ($media) use ($conversion) {
+            try {
+                return $conversion ? $media->getUrl($conversion) : $media->getUrl();
+            } catch (\Exception $e) {
+                // Fallback to original if conversion fails
+                return $media->getUrl();
+            }
+        })->toArray();
+    }
+
+    public function getImageCount()
+    {
+        return $this->getMedia('products')->count() + $this->getMedia('gallery')->count();
+    }
+
+    public function getFormattedImageData($conversion = 'medium')
+    {
+        $data = [
+            'main_image' => null,
+            'gallery_images' => [],
+            'total_images' => 0
+        ];
+
+        // Main image
+        $mainMedia = $this->getFirstMedia('products');
+        if ($mainMedia) {
+            $data['main_image'] = [
+                'id' => $mainMedia->id,
+                'url' => $this->getMainImageUrlWithFallback($conversion),
+                'original_url' => $mainMedia->getUrl(),
+                'thumb_url' => $this->getMainImageUrlWithFallback('thumb'),
+                'medium_url' => $this->getMainImageUrlWithFallback('medium'),
+                'large_url' => $this->getMainImageUrlWithFallback('large'),
+                'name' => $mainMedia->name,
+                'size' => $mainMedia->size,
+                'mime_type' => $mainMedia->mime_type,
+            ];
+        }
+
+        // Gallery images
+        $galleryMedia = $this->getMedia('gallery');
+        $data['gallery_images'] = $galleryMedia->map(function ($media) use ($conversion) {
+            return [
+                'id' => $media->id,
+                'url' => $media->getUrl($conversion) ?: $media->getUrl(),
+                'original_url' => $media->getUrl(),
+                'thumb_url' => $media->getUrl('thumb') ?: $media->getUrl(),
+                'medium_url' => $media->getUrl('medium') ?: $media->getUrl(),
+                'large_url' => $media->getUrl('large') ?: $media->getUrl(),
+                'name' => $media->name,
+                'size' => $media->size,
+                'mime_type' => $media->mime_type,
+            ];
+        })->toArray();
+
+        $data['total_images'] = ($mainMedia ? 1 : 0) + $galleryMedia->count();
+
+        return $data;
+    }
+
     // Media setup
     public function registerMediaCollections(): void
     {
@@ -181,18 +287,34 @@ class Product extends Model implements HasMedia
 
     public function registerMediaConversions(Media $media = null): void
     {
+        // Thumbnail conversion - optimized for product cards and previews
         $this->addMediaConversion('thumb')
               ->width(300)
               ->height(300)
               ->sharpen(10)
               ->optimize()
+              ->quality(85)
+              ->performOnCollections('products', 'gallery')
               ->nonQueued();
               
+        // Medium conversion - for product detail views
         $this->addMediaConversion('medium')
               ->width(600)
               ->height(600)
               ->sharpen(10)
               ->optimize()
+              ->quality(90)
+              ->performOnCollections('products', 'gallery')
+              ->nonQueued();
+
+        // Large conversion - for high-quality display
+        $this->addMediaConversion('large')
+              ->width(1200)
+              ->height(1200)
+              ->sharpen(5)
+              ->optimize()
+              ->quality(95)
+              ->performOnCollections('products', 'gallery')
               ->nonQueued();
     }
 }

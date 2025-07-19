@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Traits\FormatsProductImages;
 
 class CategoryController extends Controller
 {
+    use FormatsProductImages;
     public function index()
     {
         $categories = Category::withCount('products')->get();
@@ -23,6 +25,11 @@ class CategoryController extends Controller
             $query->with(['sizes', 'colors', 'media']);
         }])->findOrFail($id);
 
+        // Format products with proper image data
+        $category->products->transform(function ($product) {
+            return $this->formatProductWithImages($product);
+        });
+
         return response()->json([
             'category' => $category,
         ]);
@@ -36,6 +43,11 @@ class CategoryController extends Controller
             ->where('category_id', $categoryId)
             ->filter($request->only(['size', 'color', 'price']))
             ->paginate(12);
+
+        // Format products with proper image data
+        $products->getCollection()->transform(function ($product) {
+            return $this->formatProductWithImages($product);
+        });
 
         return response()->json([
             'category' => $category,

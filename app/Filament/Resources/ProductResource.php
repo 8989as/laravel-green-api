@@ -12,6 +12,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
 class ProductResource extends Resource
 {
@@ -77,16 +79,56 @@ class ProductResource extends Resource
                             ->label('Default Variant'),
                     ])
                     ->visible(fn ($get) => $get('has_variants')),
-                Forms\Components\FileUpload::make('main_image')
-                    ->label('Main Image')
-                    ->image()
-                    ->directory('products/main')
-                    ->required(),
-                Forms\Components\FileUpload::make('gallery')
-                    ->label('Gallery Images')
-                    ->image()
-                    ->multiple()
-                    ->directory('products/gallery'),
+                Forms\Components\Section::make('Product Images')
+                    ->description('Upload main product image and gallery images')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('main_image')
+                            ->label('Main Image')
+                            ->collection('products')
+                            ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '1:1',
+                                '4:3',
+                                '16:9',
+                            ])
+                            ->required()
+                            ->maxFiles(1)
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+                            ->maxSize(5120) // 5MB
+                            ->downloadable()
+                            ->previewable()
+                            ->deletable()
+                            ->reorderable(false)
+                            ->helperText('Upload the main product image. This will be displayed as the primary image.')
+                            ->validationMessages([
+                                'required' => 'A main product image is required.',
+                                'max' => 'The image must not be larger than 5MB.',
+                            ]),
+                        SpatieMediaLibraryFileUpload::make('gallery_images')
+                            ->label('Gallery Images')
+                            ->collection('gallery')
+                            ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '1:1',
+                                '4:3',
+                                '16:9',
+                            ])
+                            ->multiple()
+                            ->maxFiles(10)
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+                            ->maxSize(5120) // 5MB
+                            ->downloadable()
+                            ->previewable()
+                            ->deletable()
+                            ->reorderable()
+                            ->helperText('Upload additional product images (up to 10). These will be displayed in the product gallery.')
+                            ->validationMessages([
+                                'max' => 'Each image must not be larger than 5MB.',
+                            ]),
+                    ])
+                    ->columnSpanFull(),
                 Forms\Components\Toggle::make('is_active')
                     ->required(),
                 Forms\Components\Toggle::make('in_stock')
@@ -100,6 +142,12 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\SpatieMediaLibraryImageColumn::make('main_image')
+                    ->label('Image')
+                    ->collection('products')
+                    ->width(60)
+                    ->height(60)
+                    ->circular(),
                 Tables\Columns\TextColumn::make('name_ar')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('name_en')

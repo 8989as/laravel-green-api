@@ -6,9 +6,11 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Http\Traits\FormatsProductImages;
 
 class ProductController extends Controller
 {
+    use FormatsProductImages;
     public function show($id)
     {
         $product = Product::with(['category', 'sizes', 'colors', 'media', 'attributes'])
@@ -27,10 +29,18 @@ class ProductController extends Controller
             ->limit(4)
             ->get();
 
+        // Format the main product with proper image data
+        $formattedProduct = $this->formatProductWithImages($product);
+        
+        // Format related products with proper image data
+        $formattedRelatedProducts = $relatedProducts->map(function ($product) {
+            return $this->formatProductWithImages($product);
+        });
+
         return response()->json([
-            'product' => $product,
+            'product' => $formattedProduct,
             'isFavorite' => $isFavorite,
-            'relatedProducts' => $relatedProducts,
+            'relatedProducts' => $formattedRelatedProducts,
         ]);
     }
 

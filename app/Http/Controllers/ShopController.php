@@ -7,15 +7,22 @@ use App\Models\Product;
 use App\Models\Size;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Http\Traits\FormatsProductImages;
 
 class ShopController extends Controller
 {
+    use FormatsProductImages;
     public function allPlants(Request $request)
     {
         $products = Product::with(['category', 'sizes', 'colors', 'media', 'attributes'])
             ->where('is_active', true)
             ->filter($request->only(['category', 'size', 'color', 'price']))
             ->paginate(12);
+
+        // Format products with proper image data
+        $products->getCollection()->transform(function ($product) {
+            return $this->formatProductWithImages($product);
+        });
 
         return response()->json([
             'products'   => $products,
@@ -35,6 +42,11 @@ class ShopController extends Controller
             ->where('category_id', $category->id)
             ->paginate(12);
 
+        // Format products with proper image data
+        $products->getCollection()->transform(function ($product) {
+            return $this->formatProductWithImages($product);
+        });
+
         return response()->json([
             'category'   => $category,
             'products'   => $products,
@@ -50,6 +62,11 @@ class ShopController extends Controller
             ->where('is_active', true)
             ->where('is_gift', true)
             ->paginate(12);
+
+        // Format products with proper image data
+        $products->getCollection()->transform(function ($product) {
+            return $this->formatProductWithImages($product);
+        });
 
         return response()->json([
             'products'   => $products,
