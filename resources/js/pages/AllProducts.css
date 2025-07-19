@@ -1,0 +1,136 @@
+.all-products-container {
+  min-height: 60vh;
+}
+
+.all-products-container.rtl {
+  direction: rtl;
+}
+
+.all-products-container.ltr {
+  direction: ltr;
+}
+
+/* Pagination Styles */
+.pagination-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.pagination-wrapper .btn {
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.pagination-wrapper .btn-primary {
+  background-color: #224921;
+  border-color: #224921;
+}
+
+.pagination-wrapper .btn-primary:hover {
+  background-color: #1a3a19;
+  border-color: #1a3a19;
+}
+
+.pagination-wrapper .btn-outline-primary {
+  color: #224921;
+  border-color: #224921;
+}
+
+.pagination-wrapper .btn-outline-primary:hover {
+  background-color: #224921;
+  border-color: #224921;
+  color: white;
+}
+
+/* Loading Spinner */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Empty State */
+.text-center .fa-search {
+  opacity: 0.3;
+}
+
+/* Results Info */
+.text-muted {
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .all-products-container {
+    padding: 1rem !important;
+  }
+  
+  .pagination-wrapper {
+    gap: 4px;
+  }
+  
+  .pagination-wrapper .btn {
+    min-width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+  
+  .d-flex.justify-content-between.align-items-center {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 1rem;
+  }
+  
+  .text-muted {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .col-xl-4.col-lg-6.col-md-6 {
+    padding: 0 8px;
+  }
+  
+  .row.g-4 {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+  }
+}
+
+/* RTL Specific Styles */
+.rtl .pagination-wrapper {
+  direction: ltr; /* Keep pagination LTR for consistency */
+}
+
+.rtl .d-flex.justify-content-between {
+  flex-direction: row-reverse;
+}
+
+/* Loading and Error States */
+.alert-danger .btn-outline-danger {
+  margin-top: 1rem;
+}
+
+.spinner-border.text-primary {
+  color: #224921 !important;
+}
+
+/* Product Grid Spacing */
+.row.g-4 > * {
+  margin-bottom: 1.5rem;
+}
+
+/* Sidebar Responsive */
+@media (max-width: 991px) {
+  .col-lg-3.col-md-4 {
+    margin-bottom: 2rem;
+  }
+}

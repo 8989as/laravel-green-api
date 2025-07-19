@@ -1,93 +1,224 @@
-import './ProductCard.css';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faShoppingCart, faEye, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useCart } from '../../contexts/CartContext';
+import { isAuthenticated } from '../../contexts/AuthContext';
+import AuthModal from '../Auth/AuthModal';
+import './ProductCard.css';
 
 const ProductCard = ({
-    image,
-    name,
-    latinName,
-    price,
-    isFavorite = false,
-    onFavoriteClick,
-    onAddToCart,
-    onViewDetails,
-    loading = false
+  product,
+  showLatinName = true,
+  showDiscount = true,
+  imageSize = 'medium',
+  onFavoriteToggle,
+  className = '',
+  ...props
 }) => {
-    const { t, i18n } = useTranslation();
-    return (
-        <div className="product-card h-100 d-flex flex-column">
-            <div className="card h-100 d-flex flex-column justify-content-between align-items-stretch">
-                <div className="product-image-wrapper position-relative d-flex justify-content-center align-items-center p-3 bg-light rounded-top">
-                    <img src={image} className="product-image card-img-top mx-auto d-block" alt={name} />
-                    <button
-                        className={`favorite-btn position-absolute top-0 start-0 m-1 ${isFavorite ? 'active' : ''}`}
-                        onClick={onFavoriteClick}
-                        aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                        type="button"
-                        style={{ zIndex: 2 }}
-                    >
-                        <img
-                            src="/assets/images/favorite.svg"
-                            alt="Favorite"
-                            width="16"
-                            height="15"
-                        />
-                    </button>
-                </div>
-                <div className="card-body d-flex flex-column flex-grow-1 justify-content-between p-3 gap-3">
-                    <div className="w-100">
-                        <h5 className="product-title card-title text-start mb-1" style={{ fontSize: '1.3rem', whiteSpace: 'nowrap', overflow: 'hidden' }}>{name}</h5>
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                            <span className="product-subtitle card-subtitle text-start" style={{ fontSize: '1.3rem', whiteSpace: 'nowrap', overflow: 'hidden' }}>{latinName}</span>
-                            <span className="d-flex align-items-baseline gap-1">
-                                <span className="product-price" style={{ fontSize: '1.5rem', fontWeight: 700 }}>{price}</span>
-                                <span className="price-symbol d-flex align-items-baseline">
-                                    <img src="assets/images/sar.svg" className="price-symbol-img" alt="SAR" style={{ height: '1.1rem', verticalAlign: 'baseline', marginBottom: '2px' }} />
-                                </span>
-                            </span>
-                        </div>
-                    </div>
-                    <div className="d-flex gap-2 mt-auto">
-                        <button
-                            className="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center"
-                            onClick={onAddToCart}
-                            aria-label="Add to cart"
-                            disabled={loading}
-                            type="button"
-                        >
-                            {loading ? (
-                                <FontAwesomeIcon icon={faSpinner} spin />
-                            ) : (
-                                <FontAwesomeIcon icon={faShoppingCart} />
-                            )}
-                        </button>
-                        <button
-                            className="btn btn-outline-primary flex-grow-1 d-flex align-items-center justify-content-center"
-                            onClick={onViewDetails}
-                            aria-label="View details"
-                            type="button"
-                        >
-                            <FontAwesomeIcon icon={faEye} />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { addToCart, loading: cartLoading } = useCart();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
-ProductCard.propTypes = {
-    image: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    latinName: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-    isFavorite: PropTypes.bool,
-    onFavoriteClick: PropTypes.func.isRequired,
-    onAddToCart: PropTypes.func.isRequired,
-    onViewDetails: PropTypes.func.isRequired,
-    loading: PropTypes.bool
+  const isRTL = i18n.language === 'ar';
+  const authenticated = isAuthenticated();
+
+  // Extract product data with fallbacks
+  const {
+    id,
+    name_ar = '',
+    name_en = '',
+    name_latin = '',
+    price = 0,
+    discount_price = null,
+    current_price = price,
+    has_discount = false,
+    main_image = null,
+    is_favorite = false,
+    slug = ''
+  } = product || {};
+
+  // Get localized name
+  const displayName = isRTL ? name_ar : name_en;
+
+  // Get image URL with fallback
+  const getImageUrl = () => {
+    if (main_image?.medium_url) return main_image.medium_url;
+    if (main_image?.url) return main_image.url;
+    if (main_image?.original_url) return main_image.original_url;
+    return '/assets/images/placeholder-product.jpg';
+  };
+
+  // Handle add to cart
+  const handleAddToCart = async () => {
+    if (!authenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      const success = await addToCart(id, 1);
+      if (success) {
+        toast.success(t('addedToCart'), {
+          position: isRTL ? "bottom-left" : "bottom-right",
+          autoClose: 3000,
+        });
+      }
+    } catch (error) {
+      toast.error(t('failedToAddToCart'), {
+        position: isRTL ? "bottom-left" : "bottom-right",
+        autoClose: 3000,
+      });
+      console.error('Error adding to cart:', error);
+    }
+  };
+
+  // Handle view details
+  const handleViewDetails = () => {
+    if (slug) {
+      navigate(`/products/${slug}`);
+    } else {
+      navigate(`/products/${id}`);
+    }
+  };
+
+  // Handle favorite toggle
+  const handleFavoriteToggle = async () => {
+    if (!authenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    if (onFavoriteToggle) {
+      setFavoriteLoading(true);
+      try {
+        await onFavoriteToggle(id, !is_favorite);
+        toast.success(
+          is_favorite ? t('removedFromFavorites') : t('addedToFavorites'),
+          {
+            position: isRTL ? "bottom-left" : "bottom-right",
+            autoClose: 2000,
+          }
+        );
+      } catch (error) {
+        toast.error(t('favoriteError'), {
+          position: isRTL ? "bottom-left" : "bottom-right",
+          autoClose: 3000,
+        });
+      } finally {
+        setFavoriteLoading(false);
+      }
+    }
+  };
+
+  return (
+    <>
+      <div className={`product-card ${className}`} {...props}>
+        <div className="product-card-inner">
+          {/* Image Section */}
+          <div className="product-image-wrapper">
+            <img
+              src={getImageUrl()}
+              alt={displayName}
+              className="product-image"
+              loading="lazy"
+              onError={(e) => {
+                e.target.src = '/assets/images/placeholder-product.jpg';
+              }}
+            />
+
+            {/* Favorite Button */}
+            <button
+              className={`favorite-btn ${is_favorite ? 'active' : ''}`}
+              onClick={handleFavoriteToggle}
+              disabled={favoriteLoading}
+              aria-label={is_favorite ? t('removeFromFavorites') : t('addToFavorites')}
+            >
+                <img
+                  src="/assets/images/favorite.svg"
+                  alt="Favorite"
+                  className={is_favorite ? 'active' : ''}
+                />
+            </button>
+
+            {/* Discount Badge */}
+            {showDiscount && has_discount && discount_price && (
+              <div className="discount-badge">
+                {Math.round(((price - discount_price) / price) * 100)}% {t('off')}
+              </div>
+            )}
+          </div>
+
+          {/* Content Section */}
+          <div className="product-content">
+            <div className="product-info">
+              <h3 className="product-title">{displayName}</h3>
+              {showLatinName && name_latin && (
+                <p className="product-subtitle">{name_latin}</p>
+              )}
+            </div>
+
+            {/* Price Section */}
+            <div className="product-price-section">
+              <div className="price-container">
+                {has_discount && discount_price ? (
+                  <>
+                    <span className="current-price">{discount_price}</span>
+                    <span className="original-price">{price}</span>
+                  </>
+                ) : (
+                  <span className="current-price">{current_price || price}</span>
+                )}
+                <span className="currency">{t('sar')}</span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="product-actions">
+              <button
+                className="btn btn-primary add-to-cart-btn"
+                onClick={handleAddToCart}
+                disabled={cartLoading}
+                aria-label={t('addToCart')}
+              >
+                
+                  <>
+                    <img
+                      src="/assets/images/cart.svg"
+                      alt="Cart"
+                      className="cart-icon"
+                    />
+                    <span>{t('addToCart')}</span>
+                  </>
+                
+              </button>
+
+              <button
+                className="btn btn-outline-primary view-details-btn"
+                onClick={handleViewDetails}
+                aria-label={t('viewDetails')}
+              >
+                <img
+                  src="/assets/images/eye.svg"
+                  alt="View"
+                  className="eye-icon"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Auth Modal */}
+      <AuthModal
+        show={showAuthModal}
+        onHide={() => setShowAuthModal(false)}
+        returnUrl={window.location.pathname}
+      />
+    </>
+  );
 };
 
 export default ProductCard;

@@ -32,29 +32,33 @@ class Product extends Model implements HasMedia
         'is_gift' => 'boolean',
     ];
 
-    protected $appends = ['current_price', 'main_image', 'gallery_images', 'all_images', 'has_discount'];
+    protected $appends = [
+        'current_price', 'main_image', 'gallery_images', 'all_images', 'has_discount',
+        'total_images', 'has_main_image', 'has_gallery_images'
+    ];
 
     public function scopeFilter(Builder $query, array $filters)
     {
         $query->when($filters['category'] ?? null, function ($query, $category) {
-            $query->whereHas('category', function ($query) use ($category) {
-                $query->where('slug', $category);
-            });
+            $categories = is_array($category) ? $category : explode(',', $category);
+            $query->whereIn('category_id', $categories);
         })
         ->when($filters['size'] ?? null, function ($query, $size) {
-            $query->whereHas('sizes', function ($query) use ($size) {
-                $query->where('id', $size);
+            $sizes = is_array($size) ? $size : explode(',', $size);
+            $query->whereHas('sizes', function ($query) use ($sizes) {
+                $query->whereIn('sizes.id', $sizes);
             });
         })
         ->when($filters['color'] ?? null, function ($query, $color) {
-            $query->whereHas('colors', function ($query) use ($color) {
-                $query->where('id', $color);
+            $colors = is_array($color) ? $color : explode(',', $color);
+            $query->whereHas('colors', function ($query) use ($colors) {
+                $query->whereIn('colors.id', $colors);
             });
         })
         ->when($filters['price'] ?? null, function ($query, $price) {
             $priceRange = explode('-', $price);
             if (count($priceRange) === 2) {
-                $query->whereBetween('price', [
+                $query->whereBetween('products.price', [
                     (float) $priceRange[0], 
                     (float) $priceRange[1]
                 ]);
@@ -93,8 +97,22 @@ class Product extends Model implements HasMedia
 
     public function getMainImageAttribute()
     {
-        $mainImage = $this->getFirstMediaUrl('products');
-        return $mainImage ?: null;
+        $mainMedia = $this->getFirstMedia('products');
+        if (!$mainMedia) {
+            return null;
+        }
+
+        return [
+            'id' => $mainMedia->id,
+            'url' => $mainMedia->getUrl('medium') ?: $mainMedia->getUrl(),
+            'original_url' => $mainMedia->getUrl(),
+            'thumb_url' => $mainMedia->getUrl('thumb') ?: $mainMedia->getUrl(),
+            'medium_url' => $mainMedia->getUrl('medium') ?: $mainMedia->getUrl(),
+            'large_url' => $mainMedia->getUrl('large') ?: $mainMedia->getUrl(),
+            'name' => $mainMedia->name,
+            'size' => $mainMedia->size,
+            'mime_type' => $mainMedia->mime_type,
+        ];
     }
 
     public function getGalleryImagesAttribute()
@@ -150,6 +168,21 @@ class Product extends Model implements HasMedia
         }
         
         return $images;
+    }
+
+    public function getTotalImagesAttribute()
+    {
+        return $this->getImageCount();
+    }
+
+    public function getHasMainImageAttribute()
+    {
+        return $this->hasMainImage();
+    }
+
+    public function getHasGalleryImagesAttribute()
+    {
+        return $this->hasGalleryImages();
     }
 
     // Relationships

@@ -1,88 +1,196 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import FilterSidebar from './FilterSidebar';
 import './SideBar.css';
 
-const SideBar = () => {
+const SideBar = ({
+  categories = [],
+  colors = [],
+  sizes = [],
+  priceRange = { min: 0, max: 1000 },
+  isGift = false,
+  giftFilters = {},
+  onFilterChange = () => {},
+  onApplyFilters = () => {},
+  initialFilters = {}
+}) => {
   const { i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
 
-  const plantOptions = [
-    { label: 'أشجار', value: 'trees' },
-    { label: 'شجيرات', value: 'shrubs' },
-    { label: 'نباتات داخلية', value: 'indoor' },
-    { label: 'نباتات خارجية', value: 'outdoor' },
-    { label: 'نباتات شتوية', value: 'winter' },
-    { label: 'نباتات صيفية', value: 'summer' },
-  ];
-  const colorOptions = [
-    { label: 'برتقالى', value: '#F99B18' },
-    { label: 'بنفسجى', value: '#A20CD4' },
-    { label: 'أحمر', value: '#D40C0C' },
-    { label: 'روز', value: '#FF96B2' },
-  ];
-  const sizeOptions = [
-    { label: 'صغير', value: 'small' },
-    { label: 'متوسط', value: 'medium' },
-    { label: 'كبير', value: 'large' },
-  ];
+  const [filters, setFilters] = useState({
+    categories: initialFilters.categories || [],
+    colors: initialFilters.colors || [],
+    sizes: initialFilters.sizes || [],
+    priceRange: initialFilters.priceRange || [priceRange.min, priceRange.max],
+    ...initialFilters
+  });
 
-  const sections = [
-    {
-      key: 'plantType',
-      title: 'تصنيف النباتات',
-      type: 'checkbox',
-      options: plantOptions,
-    },
-    {
-      key: 'color',
-      title: 'اللون',
-      type: 'color',
-      options: colorOptions,
-    },
-    {
-      key: 'size',
-      title: 'حجم النبات',
-      type: 'checkbox',
-      options: sizeOptions,
-    },
-    // Add price section if needed
-  ];
+  const handleFilterChange = (filterType, value, isChecked = null) => {
+    let newFilters = { ...filters };
 
-  const [selectedCheckboxes, setSelectedCheckboxes] = React.useState({});
-  const [selectedColors, setSelectedColors] = React.useState([]);
+    if (filterType === 'priceRange') {
+      newFilters.priceRange = value;
+    } else if (Array.isArray(newFilters[filterType])) {
+      if (isChecked === null) {
+        // Toggle behavior
+        const currentValues = newFilters[filterType];
+        newFilters[filterType] = currentValues.includes(value)
+          ? currentValues.filter(item => item !== value)
+          : [...currentValues, value];
+      } else {
+        // Explicit checked/unchecked
+        newFilters[filterType] = isChecked
+          ? [...newFilters[filterType], value]
+          : newFilters[filterType].filter(item => item !== value);
+      }
+    }
 
-  const handleCheckboxChange = (sectionKey, value) => {
-    setSelectedCheckboxes((prev) => ({
-      ...prev,
-      [value]: !prev[value],
-    }));
+    setFilters(newFilters);
+    onFilterChange(newFilters);
   };
-  const handleColorSelect = (color) => {
-    setSelectedColors((prev) =>
-      prev.includes(color)
-        ? prev.filter((c) => c !== color)
-        : [...prev, color]
+
+  const renderCheckboxSection = (title, items, filterKey) => (
+    <div className="filter-section">
+      <h5 className="section-title">{title}</h5>
+      <div className="filter-options">
+        {items.map((item) => {
+          const itemId = item.id || item.value;
+          const itemName = item.name || item.label || 
+            (filterKey === 'categories' ? (isRTL ? item.category_ar : item.category_en) : 
+             filterKey === 'sizes' ? (isRTL ? item.size_ar : item.size_en) :
+             filterKey === 'colors' ? (isRTL ? item.color_ar : item.color_en) : '');
+          
+          return (
+            <div key={itemId} className="form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id={`${filterKey}-${itemId}`}
+                checked={filters[filterKey].includes(itemId)}
+                onChange={(e) => handleFilterChange(filterKey, itemId, e.target.checked)}
+              />
+              <label 
+                className="form-check-label" 
+                htmlFor={`${filterKey}-${itemId}`}
+              >
+                {itemName}
+              </label>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderColorSection = () => (
+    <div className="filter-section">
+      <h5 className="section-title">{isRTL ? 'اللون' : 'Color'}</h5>
+      <div className="color-options row g-2">
+        {colors.map((color) => {
+          const colorName = isRTL ? color.color_ar : color.color_en;
+          return (
+            <div key={color.id} className="col-6">
+              <button
+                type="button"
+                className={`color-option w-100 ${filters.colors.includes(color.id) ? 'selected' : ''}`}
+                onClick={() => handleFilterChange('colors', color.id)}
+                style={{ backgroundColor: color.hex_code }}
+              >
+                <span className="color-swatch" style={{ backgroundColor: color.hex_code }}></span>
+                <span className="color-label">{colorName}</span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderPriceSection = () => (
+    <div className="filter-section">
+      <h5 className="section-title">{isRTL ? 'السعر' : 'Price'}</h5>
+      <div className="price-range">
+        <div className="price-inputs">
+          <input
+            type="number"
+            className="form-control price-input"
+            placeholder={isRTL ? 'من' : 'Min'}
+            value={filters.priceRange[0]}
+            onChange={(e) => handleFilterChange('priceRange', [Number(e.target.value), filters.priceRange[1]])}
+          />
+          <span className="price-separator">-</span>
+          <input
+            type="number"
+            className="form-control price-input"
+            placeholder={isRTL ? 'إلى' : 'Max'}
+            value={filters.priceRange[1]}
+            onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], Number(e.target.value)])}
+          />
+        </div>
+        <input
+          type="range"
+          className="form-range price-slider"
+          min={priceRange.min}
+          max={priceRange.max}
+          value={filters.priceRange[1]}
+          onChange={(e) => handleFilterChange('priceRange', [filters.priceRange[0], Number(e.target.value)])}
+        />
+      </div>
+    </div>
+  );
+
+  const renderGiftFilters = () => {
+    if (!isGift || !giftFilters) return null;
+
+    return (
+      <div className="gift-filters">
+        <h5 className="section-title">{isRTL ? 'خيارات الهدايا' : 'Gift Options'}</h5>
+        {giftFilters.occasions && renderCheckboxSection(
+          isRTL ? 'المناسبات' : 'Occasions',
+          giftFilters.occasions,
+          'occasions'
+        )}
+        {giftFilters.recipients && renderCheckboxSection(
+          isRTL ? 'المستلمين' : 'Recipients',
+          giftFilters.recipients,
+          'recipients'
+        )}
+        {giftFilters.themes && renderCheckboxSection(
+          isRTL ? 'المواضيع' : 'Themes',
+          giftFilters.themes,
+          'themes'
+        )}
+      </div>
     );
   };
 
   return (
-    <div className="sidebar-container container-fluid p-0">
-      <div className="row">
-        <div className="col-12">
-          <FilterSidebar
-            isRTL={isRTL}
-            title="تصفية المنتاجات"
-            sections={sections}
-            selectedCheckboxes={selectedCheckboxes}
-            selectedColors={selectedColors}
-            onCheckboxChange={handleCheckboxChange}
-            onColorSelect={handleColorSelect}
-            actionLabel="تصفية المنتاجات"
-            onAction={() => {}}
-          />
-        </div>
-      </div>
+    <div className={`sidebar-container ${isRTL ? 'rtl' : 'ltr'}`}>
+      <h3 className="filter-title">{isRTL ? 'تصفية المنتجات' : 'Filter Products'}</h3>
+      
+      {categories.length > 0 && renderCheckboxSection(
+        isRTL ? 'الفئات' : 'Categories',
+        categories,
+        'categories'
+      )}
+      
+      {colors.length > 0 && renderColorSection()}
+      
+      {sizes.length > 0 && renderCheckboxSection(
+        isRTL ? 'الأحجام' : 'Sizes',
+        sizes,
+        'sizes'
+      )}
+      
+      {renderPriceSection()}
+      
+      {renderGiftFilters()}
+      
+      <button 
+        className="btn btn-primary filter-apply-btn w-100 mt-4"
+        onClick={() => onApplyFilters(filters)}
+      >
+        {isRTL ? 'تطبيق الفلاتر' : 'Apply Filters'}
+      </button>
     </div>
   );
 };
