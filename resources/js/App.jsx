@@ -55,7 +55,7 @@ function App() {
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/events" element={<EventsPage />} />
-                    
+
                     {/* Protected Routes */}
                     <Route path="/cart" element={
                       <AuthRoute>
@@ -83,9 +83,9 @@ function App() {
                       </AuthRoute>
                     } />
                   </Routes>
-                  
+
                   {/* Toast notifications container */}
-                  <ToastContainer 
+                  <ToastContainer
                     position={toastPosition}
                     autoClose={3000}
                     hideProgressBar={false}

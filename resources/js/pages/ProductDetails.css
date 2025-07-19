@@ -111,6 +111,17 @@
   line-height: 48px;
 }
 
+.pd-original-price {
+  text-align: right;
+  color: #9FAB9E;
+  font-size: 24px;
+  font-family: 'El Messiri', sans-serif;
+  font-weight: 400;
+  line-height: 24px;
+  text-decoration: line-through;
+  margin-left: 8px;
+}
+
 .pd-currency-icon {
   width: 32px;
   height: 32px;

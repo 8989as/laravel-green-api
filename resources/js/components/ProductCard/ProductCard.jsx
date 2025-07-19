@@ -78,9 +78,9 @@ const ProductCard = ({
   // Handle view details
   const handleViewDetails = () => {
     if (slug) {
-      navigate(`/products/${slug}`);
+      navigate(`/product/${slug}`);
     } else {
-      navigate(`/products/${id}`);
+      navigate(`/product/${id}`);
     }
   };
 
@@ -136,11 +136,11 @@ const ProductCard = ({
               disabled={favoriteLoading}
               aria-label={is_favorite ? t('removeFromFavorites') : t('addToFavorites')}
             >
-                <img
-                  src="/assets/images/favorite.svg"
-                  alt="Favorite"
-                  className={is_favorite ? 'active' : ''}
-                />
+              <img
+                src="/assets/images/favorite.svg"
+                alt="Favorite"
+                className={is_favorite ? 'active' : ''}
+              />
             </button>
 
             {/* Discount Badge */}
@@ -183,16 +183,16 @@ const ProductCard = ({
                 disabled={cartLoading}
                 aria-label={t('addToCart')}
               >
-                
-                  <>
-                    <img
-                      src="/assets/images/cart.svg"
-                      alt="Cart"
-                      className="cart-icon"
-                    />
-                    <span>{t('addToCart')}</span>
-                  </>
-                
+
+                <>
+                  <img
+                    src="/assets/images/cart.svg"
+                    alt="Cart"
+                    className="cart-icon"
+                  />
+                  <span>{t('addToCart')}</span>
+                </>
+
               </button>
 
               <button
