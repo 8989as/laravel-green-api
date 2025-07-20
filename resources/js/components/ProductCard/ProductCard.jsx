@@ -186,11 +186,11 @@ const ProductCard = ({
 
                 <>
                   <img
-                    src="/assets/images/cart.svg"
+                    src="/assets/images/navCart.svg"
                     alt="Cart"
                     className="cart-icon"
                   />
-                  <span>{t('addToCart')}</span>
+                  {/* <span>{t('addToCart')}</span> */}
                 </>
 
               </button>
