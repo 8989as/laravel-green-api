@@ -2,18 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\FormatsProductImages;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use App\Http\Traits\FormatsProductImages;
 
 class CategoryController extends Controller
 {
     use FormatsProductImages;
+
     public function index()
     {
         $categories = Category::withCount('products')->get();
-        
+
+        return response()->json([
+            'categories' => $categories,
+        ]);
+    }
+
+    public function navCats()
+    {
+        $categories = Category::select('id', 'category_ar', 'category_en')->get();
+
         return response()->json([
             'categories' => $categories,
         ]);
@@ -21,7 +31,7 @@ class CategoryController extends Controller
 
     public function show($id)
     {
-        $category = Category::with(['products' => function($query) {
+        $category = Category::with(['products' => function ($query) {
             $query->with(['sizes', 'colors', 'media']);
         }])->findOrFail($id);
 
@@ -38,7 +48,7 @@ class CategoryController extends Controller
     public function getProductsByCategory($categoryId, Request $request)
     {
         $category = Category::findOrFail($categoryId);
-        
+
         $products = Product::with(['category', 'sizes', 'colors', 'media'])
             ->where('category_id', $categoryId)
             ->filter($request->only(['size', 'color', 'price']))

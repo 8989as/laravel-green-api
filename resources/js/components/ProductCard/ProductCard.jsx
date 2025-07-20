@@ -178,7 +178,7 @@ const ProductCard = ({
             {/* Action Buttons */}
             <div className="product-actions">
               <button
-                className="btn btn-primary add-to-cart-btn"
+                className="btn add-to-cart-btn"
                 onClick={handleAddToCart}
                 disabled={cartLoading}
                 aria-label={t('addToCart')}
@@ -196,7 +196,7 @@ const ProductCard = ({
               </button>
 
               <button
-                className="btn btn-outline-primary view-details-btn"
+                className="btn view-details-btn"
                 onClick={handleViewDetails}
                 aria-label={t('viewDetails')}
               >

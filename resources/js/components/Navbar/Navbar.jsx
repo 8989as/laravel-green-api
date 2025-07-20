@@ -1,29 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faSearch,
-  faHeart,
-  faShoppingCart,
-  faList,
-  faLanguage
-} from '@fortawesome/free-solid-svg-icons';
-import 'bootstrap/dist/css/bootstrap.rtl.min.css';
-import './Navbar.css'; // Only for colors, font, and minor tweaks
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './Navbar.css';
 import './CartBadge.css';
 import { useCart } from '../../contexts/CartContext.jsx';
 import NavAuthButtons from '../Auth/NavAuthButtons.jsx';
-
-// Add icons to library
-library.add(faSearch, faHeart, faShoppingCart, faList, faLanguage);
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const { cartItemCount, recentlyUpdated } = useCart();
   const [animateCart, setAnimateCart] = React.useState(false);
+  const [apiCategories, setApiCategories] = useState([]);
 
   React.useEffect(() => {
     if (recentlyUpdated) {
@@ -35,11 +24,34 @@ const Navbar = () => {
     }
   }, [recentlyUpdated]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/nav-cats');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        setApiCategories(data.categories);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const categories = useMemo(() => {
+    return apiCategories.map(cat => ({
+      id: cat.id.toString(),
+      label: cat[`category_${i18n.language}`] || ''
+    }));
+  }, [apiCategories, i18n.language]);
+
   const toggleLanguage = () => {
     const newLang = isRTL ? 'en' : 'ar';
     i18n.changeLanguage(newLang);
     document.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-    // Dynamically load the appropriate Bootstrap CSS
     const linkId = 'bootstrap-css';
     let link = document.getElementById(linkId);
     if (!link) {
@@ -49,16 +61,10 @@ const Navbar = () => {
       document.head.appendChild(link);
     }
     link.href = newLang === 'ar'
-      ? 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css'
+      ? 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css'
       : 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
   };
 
-  const categories = [
-    { id: 'summerPlants', label: t('summerPlants') },
-    { id: 'winterPlants', label: t('winterPlants') },
-    { id: 'naturalGrass', label: t('naturalGrass') },
-    { id: 'trees', label: t('trees') },
-  ];
   const displayedCategories = isRTL ? categories : [...categories].reverse();
 
   return (

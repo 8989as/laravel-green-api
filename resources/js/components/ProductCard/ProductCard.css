@@ -8,6 +8,7 @@
   --text-muted: #9FAB9E;
   --image-bg: #ECF3EC;
   --favorite-bg: #F8FFF8;
+  --btn-bg: #ECF3EC;
   --border-radius: 5px;
   --transition: all 0.3s ease;
 }
@@ -67,7 +68,7 @@
   left: 12px;
   width: 36px;
   height: 36px;
-  background: var(--favorite-bg);
+  background: var(--btn-bg);
   border: none;
   border-radius: var(--border-radius);
   display: flex;
@@ -189,7 +190,7 @@
   flex: 1;
   background-color: var(--success-color);
   border-color: var(--success-color);
-  color: white;
+  color: var(--primary-color);
   padding: 10px 16px;
   border-radius: var(--border-radius);
   font-weight: 500;
@@ -227,8 +228,8 @@
 }
 
 .view-details-btn:hover {
-  background-color: var(--success-color);
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--primary-color);
   transform: translateY(-1px);
 }
 
