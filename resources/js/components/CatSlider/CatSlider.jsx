@@ -50,16 +50,29 @@ const CatSlider = () => {
       ];
 
   return (
-    <div className={`container cat-slider-container ${isRTL ? 'rtl' : ''}`}>  
-      <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-        <h2 className="section-title m-0">{t('plantCategories')}</h2>
+    <div className= "container cat-slider-container">  
+      <div className="d-flex justify-content-between align-items-start mb-4 flex-wrap">
+        <h2 className={`section-title m-0${isRTL ? 'rtl' : 'ltr'}`}>{t('plantCategories')}</h2>
         <div className="d-flex gap-2 align-items-center flex-wrap hover-controls">
-          <button className="btn btn-success btn-sm" onClick={handlePrev} aria-label="Previous">
-            <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-          </button>
-          <button className="btn btn-success btn-sm" onClick={handleNext} aria-label="Next">
-            <span className="carousel-control-next-icon" aria-hidden="true"></span>
-          </button>
+          {isRTL ? (
+            <>
+              <button className="btn btn-success btn-sm" onClick={handleNext} aria-label="Next">
+                <span className="carousel-control-next-icon" aria-hidden="true"></span>
+              </button>
+              <button className="btn btn-success btn-sm" onClick={handlePrev} aria-label="Previous">
+                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="btn btn-success btn-sm" onClick={handlePrev} aria-label="Previous">
+                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+              </button>
+              <button className="btn btn-success btn-sm" onClick={handleNext} aria-label="Next">
+                <span className="carousel-control-next-icon" aria-hidden="true"></span>
+              </button>
+            </>
+          )}
         </div>
       </div>
       <div className="row row-cols-2 row-cols-md-4 g-3 justify-content-center">

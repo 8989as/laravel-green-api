@@ -2,10 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './Navbar.css';
-import './CartBadge.css';
 import { useCart } from '../../contexts/CartContext.jsx';
 import NavAuthButtons from '../Auth/NavAuthButtons.jsx';
+import './Navbar.css';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -52,17 +51,6 @@ const Navbar = () => {
     const newLang = isRTL ? 'en' : 'ar';
     i18n.changeLanguage(newLang);
     document.dir = newLang === 'ar' ? 'rtl' : 'ltr';
-    const linkId = 'bootstrap-css';
-    let link = document.getElementById(linkId);
-    if (!link) {
-      link = document.createElement('link');
-      link.id = linkId;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-    link.href = newLang === 'ar'
-      ? 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css'
-      : 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
   };
 
   const displayedCategories = isRTL ? categories : [...categories].reverse();

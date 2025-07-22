@@ -23,7 +23,10 @@ const resources = {
       shrubs: 'شجيرات',
       trees: 'أشجار',
       plantCategories: 'تصنيفات النباتات',
-      
+      heroTitle: 'من قلب الرياض إلى كل أرجاء المملكة نباتات تزدهر بالحُب والعناية',
+      heroSubtitle: 'في مزارع ومشاتل مساراتكو، نقدم لك تشكيلة متميزة من نباتات الزينة، الداخلية والخارجية، مزروعة بأحدث التقنيات وتحت إشراف نخبة من الخبراء الزراعيين. نوصلك بالجمال الطبيعي، أينما كنت، بجودة لا تُضاهى وخدمة لا تُنسى.',
+      heroButton: 'تسوق الآن',
+
       // Auth required messages
       authenticationRequired: 'مطلوب تسجيل الدخول',
       pleaseLoginToViewCart: 'يرجى تسجيل الدخول لعرض عربة التسوق الخاصة بك',
@@ -32,7 +35,7 @@ const resources = {
       pleaseLoginToBuy: 'يرجى تسجيل الدخول للشراء',
       pleaseLoginToSaveItems: 'يرجى تسجيل الدخول لحفظ العناصر',
       goToLogin: 'الذهاب إلى صفحة تسجيل الدخول',
-      
+
       // Auth translations
       login: 'تسجيل دخول',
       register: 'إنشاء حساب',
@@ -60,7 +63,7 @@ const resources = {
       otpVerified: 'تم التحقق بنجاح',
       invalidOTP: 'رمز التحقق غير صحيح',
       resendOTP: 'إعادة إرسال الرمز',
-      
+
       // Cart page translations
       cart: 'عربة التسوق',
       product: 'المنتج',
@@ -161,7 +164,7 @@ const resources = {
       loadingOrderDetails: 'جاري تحميل تفاصيل الطلب...',
       sizes: 'الأحجام',
       colors: 'الألوان',
-      
+
       // Profile page translations
       accountDetails: 'تفاصيل الحساب',
       wishlist: 'المفضلة',
@@ -181,8 +184,8 @@ const resources = {
       failedToLoadProfile: 'فشل تحميل الملف الشخصي',
       failedToLoadCart: 'فشل تحميل عربة التسوق',
       productDescription: 'وصف المنتج',
-      size:'الأحجام',
-      color:'الألوان'
+      size: 'الأحجام',
+      color: 'الألوان'
     }
   },
   en: {
@@ -209,6 +212,9 @@ const resources = {
       category: 'Category',
       productDescription: 'Product Description',
       price: 'Price',
+      heroTitle: 'From the heart of Riyadh to every corner of the Kingdom, plants flourish with love and care.',
+      heroSubtitle: 'At Masaratco Farms and Nurseries, we offer you a distinguished selection of ornamental plants—both indoor and outdoor—grown using the latest technologies and under the supervision of a team of elite agricultural experts. We connect you with natural beauty, wherever you are, with unmatched quality and unforgettable service.',
+      heroButton: 'Shop Now',
       // Auth required messages
       authenticationRequired: 'Authentication Required',
       pleaseLoginToViewCart: 'Please log in to view your cart',
@@ -217,7 +223,7 @@ const resources = {
       pleaseLoginToBuy: 'Please log in to make a purchase',
       pleaseLoginToSaveItems: 'Please log in to save items',
       goToLogin: 'Go to Login Page',
-      
+
       // Auth translations
       login: 'Login',
       register: 'Register',
@@ -246,7 +252,7 @@ const resources = {
       invalidOTP: 'Invalid verification code',
       resendOTP: 'Resend code',
       allProducts: 'Shop All Plants',
-      
+
       // Auth translations
       login: 'Login',
       register: 'Register',
@@ -274,7 +280,7 @@ const resources = {
       otpVerified: 'OTP verified successfully',
       invalidOTP: 'Invalid OTP',
       resendOTP: 'Resend OTP',
-      
+
       // Cart page translations
       cart: 'Shopping Cart',
       product: 'Product',
@@ -345,7 +351,7 @@ const resources = {
       checkoutError: 'An error occurred while processing your order.',
       securePaymentMessage: 'All transactions are secure and encrypted',
       noItems: 'No items in cart',
-      
+
       // Orders page translations
       myAccount: 'My Account',
       myOrders: 'My Orders',
@@ -369,7 +375,7 @@ const resources = {
       estimatedDelivery: 'Estimated Delivery',
       errorFetchingOrders: 'Error loading orders',
       loadingOrderDetails: 'Loading order details...',
-      
+
       // Profile page translations
       accountDetails: 'Account Details',
       wishlist: 'Wishlist',
