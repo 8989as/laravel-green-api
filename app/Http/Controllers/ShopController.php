@@ -1,17 +1,18 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Http\Traits\FormatsProductImages;
 use App\Models\Category;
 use App\Models\Color;
 use App\Models\Product;
 use App\Models\Size;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Http\Traits\FormatsProductImages;
 
 class ShopController extends Controller
 {
     use FormatsProductImages;
+
     public function allPlants(Request $request)
     {
         $products = Product::with(['category', 'sizes', 'colors', 'media', 'attributes'])
@@ -25,10 +26,10 @@ class ShopController extends Controller
         });
 
         return response()->json([
-            'products'   => $products,
+            'products' => $products,
             'categories' => Category::all(),
-            'sizes'      => Size::all(),
-            'colors'     => Color::all(),
+            'sizes' => Size::all(),
+            'colors' => Color::all(),
         ]);
     }
 
@@ -48,11 +49,11 @@ class ShopController extends Controller
         });
 
         return response()->json([
-            'category'   => $category,
-            'products'   => $products,
+            'category' => $category,
+            'products' => $products,
             'categories' => Category::all(),
-            'sizes'      => Size::all(),
-            'colors'     => Color::all(),
+            'sizes' => Size::all(),
+            'colors' => Color::all(),
         ]);
     }
 
@@ -69,10 +70,28 @@ class ShopController extends Controller
         });
 
         return response()->json([
-            'products'   => $products,
+            'products' => $products,
             'categories' => Category::all(),
-            'sizes'      => Size::all(),
-            'colors'     => Color::all(),
+            'sizes' => Size::all(),
+            'colors' => Color::all(),
+        ]);
+    }
+
+    public function latestProducts()
+    {
+        $products = Product::with(['category', 'sizes', 'colors', 'media', 'attributes'])
+            ->where('is_active', true)
+            ->latest()
+            ->take(3)
+            ->get();
+
+        // Format products with proper image data
+        $products = $products->map(function ($product) {
+            return $this->formatProductWithImages($product);
+        });
+
+        return response()->json([
+            'products' => $products,
         ]);
     }
 }

@@ -25,6 +25,7 @@ Route::group([], function () {
     Route::get('/products', [ShopController::class, 'allPlants']);
     Route::get('/products/category/{id}', [ShopController::class, 'category']);
     Route::get('/products/gifts', [ShopController::class, 'gifts']);
+    Route::get('/products-latest', [ShopController::class, 'latestProducts']);
 
     // Product routes
     Route::get('/products/{id}', [ProductController::class, 'show']);
