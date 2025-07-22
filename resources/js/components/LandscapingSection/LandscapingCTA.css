@@ -1,0 +1,262 @@
+/* LandscapingCTA.css */
+
+/* Main container matching Figma dimensions */
+.landscaping-cta-container {
+  width: 100%;
+  max-width: 1280px;
+  height: 189px;
+  position: relative;
+  border-radius: 5px;
+  margin: 0 auto;
+}
+
+/* Frame container */
+.cta-frame {
+  width: 100%;
+  height: 189px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+/* Background rectangle */
+.cta-background-rect {
+  width: 100%;
+  height: 189px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: #ECF3EC;
+  border-radius: 5px;
+}
+
+/* Image with overlay and styling */
+.cta-image {
+  width: 951px;
+  height: 310px;
+  position: absolute;
+  left: 0;
+  top: -71px;
+  background: linear-gradient(0deg, rgba(61, 133, 60, 0.33) 0%, rgba(61, 133, 60, 0.33) 100%);
+  border-top-right-radius: 229.50px;
+  border-bottom-right-radius: 97px;
+  border-right: 7px #3D853C solid;
+  object-fit: cover;
+}
+
+/* CTA Button */
+.cta-button {
+  padding: 12px 24px;
+  position: absolute;
+  left: 1084px;
+  top: 113px;
+  background: #3D853C;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background: #2E6B2E;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(61, 133, 60, 0.2);
+}
+
+.cta-button:active {
+  transform: translateY(0);
+}
+
+/* Button text */
+.cta-button-text {
+  text-align: right;
+  color: #E6EAED;
+  font-size: 20px;
+  font-family: 'El Messiri', Arial, sans-serif;
+  font-weight: 500;
+  line-height: 20px;
+  word-wrap: break-word;
+}
+
+/* Main title */
+.cta-title {
+  position: absolute;
+  left: 974px;
+  top: 32px;
+  text-align: right;
+  color: #3D853C;
+  font-size: 36px;
+  font-family: 'El Messiri', Arial, sans-serif;
+  font-weight: 600;
+  line-height: 48.6px;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+/* RTL Support */
+[dir="rtl"] .cta-button-text,
+[dir="rtl"] .cta-title {
+  font-family: 'El Messiri', 'Cairo', 'Amiri', Arial, sans-serif;
+}
+
+[dir="ltr"] .cta-button-text,
+[dir="ltr"] .cta-title {
+  text-align: left;
+}
+
+[dir="ltr"] .cta-button {
+  left: 72px; /* Flipped position for LTR */
+}
+
+[dir="ltr"] .cta-title {
+  left: 72px; /* Flipped position for LTR */
+  text-align: left;
+}
+
+/* Responsive Design */
+@media (max-width: 1280px) {
+  .landscaping-cta-container {
+    width: 100%;
+    margin: 0 15px;
+  }
+  
+  .cta-image {
+    width: 74.3%; /* Maintain ratio */
+  }
+  
+  .cta-button {
+    left: 84.7%;
+    transform: translateX(-50%);
+  }
+  
+  .cta-title {
+    left: 76.1%;
+    transform: translateX(-50%);
+  }
+  
+  [dir="ltr"] .cta-button,
+  [dir="ltr"] .cta-title {
+    left: 15.3%;
+    transform: translateX(50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .landscaping-cta-container {
+    height: 150px;
+    margin: 0 10px;
+  }
+  
+  .cta-frame,
+  .cta-background-rect {
+    height: 150px;
+  }
+  
+  .cta-image {
+    height: 246px; /* Proportional scaling */
+    top: -56px;
+    border-top-right-radius: 182px;
+    border-bottom-right-radius: 77px;
+  }
+  
+  .cta-button {
+    top: 90px;
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+  
+  .cta-button-text {
+    font-size: 16px;
+    line-height: 16px;
+  }
+  
+  .cta-title {
+    top: 25px;
+    font-size: 28px;
+    line-height: 38px;
+  }
+}
+
+@media (max-width: 576px) {
+  .landscaping-cta-container {
+    height: 120px;
+    margin: 0 5px;
+  }
+  
+  .cta-frame,
+  .cta-background-rect {
+    height: 120px;
+  }
+  
+  .cta-image {
+    height: 197px;
+    top: -45px;
+    border-top-right-radius: 146px;
+    border-bottom-right-radius: 62px;
+    border-right-width: 5px;
+  }
+  
+  .cta-button {
+    top: 72px;
+    padding: 6px 12px;
+    border-radius: 4px;
+  }
+  
+  .cta-button-text {
+    font-size: 14px;
+    line-height: 14px;
+  }
+  
+  .cta-title {
+    top: 20px;
+    font-size: 22px;
+    line-height: 30px;
+  }
+}
+
+/* Animation effects */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+[dir="rtl"] .cta-title,
+[dir="rtl"] .cta-button {
+  animation: slideInRight 0.6s ease-out;
+}
+
+[dir="ltr"] .cta-title,
+[dir="ltr"] .cta-button {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.cta-image {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+[dir="rtl"] .cta-image {
+  animation: slideInLeft 0.8s ease-out;
+}

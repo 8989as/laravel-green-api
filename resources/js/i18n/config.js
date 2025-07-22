@@ -185,11 +185,16 @@ const resources = {
       failedToLoadCart: 'فشل تحميل عربة التسوق',
       productDescription: 'وصف المنتج',
       size: 'الأحجام',
-      color: 'الألوان'
+      color: 'الألوان',
+      landscapingTitle: 'أعمال اللاندسكيب',
+      landscapingButton: 'اكتشف المزيد'
+
     }
   },
   en: {
     translations: {
+      landscapingTitle: 'Landscaping Works',
+      landscapingButton: 'Discover More',
       search: 'Search all store products...',
       contact: 'Contact Us',
       landscaping: 'Landscaping Works',

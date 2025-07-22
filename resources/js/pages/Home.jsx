@@ -5,6 +5,7 @@ import Footer from '../components/Footer/Footer';
 import HomeHero from '../components/HomeHero/HomeHero';
 import CatSlider from '../components/CatSlider/CatSlider';
 import ProductCard from '../components/ProductCard';
+import LandscapingCTA from '../components/LandscapingSection/LandscapingCTA';
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -129,6 +130,7 @@ const Home = () => {
                     </div>
                 )}
             </div>
+            <LandscapingCTA />
             <Footer />
         </>
     );
