@@ -1,17 +1,17 @@
 import "./Events.css";
 
-// Image assets from Figma export
-const img1 = "assets/images/events-1.png";
-const img2 = "assets/images/events-2.png";
-const img3 = "assets/images/events-3.png";
-const img4 = "assets/images/events-4.png";
-const img5 = "assets/images/events-5.png";
-const img6 = "assets/images/events-6.png";
-const img7 = "assets/images/events-7.png";
-const img8 = "assets/images/events-8.png";
-const img9 = "assets/images/events-9.png";
-const img10 = "assets/images/events-10.png";
-const icon = "assets/images/breadcrumb.svg";
+// Image assets from public directory
+const img1 = "/assets/images/events-1.png";
+const img2 = "/assets/images/events-2.png";
+const img3 = "/assets/images/events-3.png";
+const img4 = "/assets/images/events-4.png";
+const img5 = "/assets/images/events-5.png";
+const img6 = "/assets/images/events-6.png";
+const img7 = "/assets/images/events-7.png";
+const img8 = "/assets/images/events-8.png";
+const img9 = "/assets/images/events-9.png";
+const img10 = "/assets/images/events-10.png";
+const icon = "/assets/images/breadcrumb.svg";
 
 export default function Events() {
     return (
@@ -48,39 +48,51 @@ export default function Events() {
                     </div>
                 </div>
                 <div className="col-lg-7 d-flex align-items-stretch">
-                    <div className="d-flex w-100 gap-4">
-                        <div className="d-flex flex-column justify-content-between align-items-stretch" style={{ flex: 1, gap: 0 }}>
-                            <img src={img1} alt="event1" className="rounded-4 mb-4 flex-grow-1 w-100" style={{ borderRadius: 15, objectFit: 'cover', height: 532, minWidth: 0 }} />
+                    <div className="events-images-container">
+                        <div className="events-main-image">
+                            <img src={img1} alt="event1" className="events-img-large" />
                         </div>
-                        <div className="d-flex flex-column justify-content-center align-items-start gap-4" style={{ flex: 1 }}>
-                            <img src={img2} alt="event2" className="rounded-4" style={{ width: 302, height: 305, borderRadius: 15, objectFit: 'cover' }} />
-                            <img src={img3} alt="event3" className="rounded-4" style={{ width: 302, height: 203, borderRadius: 15, objectFit: 'cover' }} />
+                        <div className="events-side-images">
+                            <img src={img2} alt="event2" className="events-img-medium" />
+                            <img src={img3} alt="event3" className="events-img-small" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Previous Events - Figma Native Layout */}
-            <div className="d-flex flex-column align-items-center gap-4 mb-5">
-                <h2 className="events-title text-start" style={{ fontSize: 36, lineHeight: '48.6px' }}>أعمال تجهيزات المناسبات السابقة</h2>
-                <div className="d-flex flex-column gap-3 w-100">
-                    <div className="d-flex flex-row gap-4 w-100 justify-content-center align-items-center">
-                        <img src={img4} alt="event4" className="rounded-4" style={{ width: 411, height: 313, borderRadius: 15, objectFit: 'cover' }} />
-                        <img src={img5} alt="event5" className="rounded-4" style={{ width: 411, height: 313, borderRadius: 15, objectFit: 'cover' }} />
-                        <img src={img6} alt="event6" className="rounded-4" style={{ width: 411, height: 313, borderRadius: 15, objectFit: 'cover' }} />
-                    </div>
-                    <div className="d-flex flex-row gap-4 w-100 justify-content-center align-items-center">
-                        <img src={img7} alt="event7" className="rounded-4" style={{ width: 411, height: 313, borderRadius: 15, objectFit: 'cover' }} />
-                        <img src={img8} alt="event8" className="rounded-4" style={{ width: 411, height: 313, borderRadius: 15, objectFit: 'cover' }} />
-                        <img src={img10} alt="event10" className="rounded-4" style={{ width: 411, height: 313, borderRadius: 15, objectFit: 'cover' }} />
+            {/* Previous Events - Responsive Grid */}
+            <div className="events-gallery-section">
+                <h2 className="events-title text-center mb-4">أعمال تجهيزات المناسبات السابقة</h2>
+                <div className="events-gallery">
+                    <div className="row g-3 g-md-4">
+                        <div className="col-12 col-md-6 col-lg-4">
+                            <img src={img4} alt="event4" className="events-gallery-img" />
+                        </div>
+                        <div className="col-12 col-md-6 col-lg-4">
+                            <img src={img5} alt="event5" className="events-gallery-img" />
+                        </div>
+                        <div className="col-12 col-md-6 col-lg-4">
+                            <img src={img6} alt="event6" className="events-gallery-img" />
+                        </div>
+                        <div className="col-12 col-md-6 col-lg-4">
+                            <img src={img7} alt="event7" className="events-gallery-img" />
+                        </div>
+                        <div className="col-12 col-md-6 col-lg-4">
+                            <img src={img8} alt="event8" className="events-gallery-img" />
+                        </div>
+                        <div className="col-12 col-md-6 col-lg-4">
+                            <img src={img10} alt="event10" className="events-gallery-img" />
+                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Request Form */}
             <div className="row align-items-stretch g-4 mt-5">
-                <div className="col-lg-6 order-lg-2 mb-4 mb-lg-0 d-flex justify-content-center align-items-stretch">
-                    <div className="events-img rounded-4 w-100 h-100" style={{ backgroundImage: `url(${img9})`, maxWidth: 500, minHeight: 0, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
+                <div className="col-lg-6 order-lg-2 mb-4 mb-lg-0">
+                    <div className="events-form-image">
+                        <img src={img9} alt="event form" className="w-100 h-100 rounded-4" />
+                    </div>
                 </div>
                 <div className="col-lg-6 order-lg-1 d-flex align-items-stretch">
                     <div className="w-100 d-flex flex-column justify-content-center">

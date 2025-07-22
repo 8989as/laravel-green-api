@@ -6,7 +6,7 @@ const EventsPage = () => {
     return (
         <>
             <Navbar />
-            <div className="container-fluid p-0">
+            <div className="container">
                 <Events />
             </div>
             <Footer />
