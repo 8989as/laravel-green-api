@@ -2,20 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\SizeResource\Pages\CreateSize;
+use App\Filament\Resources\SizeResource\Pages\EditSize;
+use App\Filament\Resources\SizeResource\Pages\ListSizes;
 use App\Models\Size;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use App\Filament\Resources\SizeResource\Pages\ListSizes;
-use App\Filament\Resources\SizeResource\Pages\CreateSize;
-use App\Filament\Resources\SizeResource\Pages\EditSize;
 
 class SizeResource extends Resource
 {
     protected static ?string $model = Size::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-scale';
+
     protected static ?string $navigationGroup = 'Product Management';
 
     public static function form(Form $form): Form
