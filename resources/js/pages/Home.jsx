@@ -109,15 +109,14 @@ const Home = () => {
                                 <ProductCard
                                     product={{
                                         id: product.id,
-                                        name: product.name,
                                         name_ar: product.name_ar,
                                         name_en: product.name_en,
-                                        latin_name: product.name_latin,
+                                        name_latin: product.name_latin,
                                         price: parseFloat(product.price),
                                         discount_price: product.discount_price ? parseFloat(product.discount_price) : null,
                                         current_price: parseFloat(product.current_price || product.price),
                                         has_discount: product.has_discount,
-                                        main_image: product.main_image?.url || product.main_image?.medium_url,
+                                        main_image: product.main_image,
                                         is_favorite: product.is_favorite || false,
                                         slug: product.slug || product.id.toString()
                                     }}
@@ -166,12 +165,12 @@ const Home = () => {
                                         id: product.id,
                                         name_ar: product.name_ar,
                                         name_en: product.name_en,
-                                        latin_name: product.name_latin,
+                                        name_latin: product.name_latin,
                                         price: parseFloat(product.price),
                                         discount_price: product.discount_price ? parseFloat(product.discount_price) : null,
                                         current_price: parseFloat(product.current_price || product.price),
                                         has_discount: product.has_discount,
-                                        main_image: product.main_image?.url || product.main_image?.medium_url,
+                                        main_image: product.main_image,
                                         is_favorite: product.is_favorite || false,
                                         slug: product.slug || product.id.toString()
                                     }}
