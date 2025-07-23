@@ -109,6 +109,21 @@
   text-align: center;
 }
 
+/* Color Icon Container */
+.color-icon-container {
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.color-icon-container:hover {
+  outline: 2px solid var(--primary-color) !important;
+}
+
+.color-icon-container.selected {
+  outline: 2px solid var(--primary-color) !important;
+  background-color: rgba(111, 129, 110, 0.05);
+}
+
 /* Price Range */
 .price-range {
   display: flex;
@@ -181,19 +196,19 @@
     margin-bottom: 24px;
     padding: 1rem;
   }
-  
+
   .filter-title {
     font-size: 20px;
   }
-  
+
   .section-title {
     font-size: 18px;
   }
-  
+
   .color-options {
     gap: 6px;
   }
-  
+
   .color-option {
     min-height: 50px;
     padding: 6px;

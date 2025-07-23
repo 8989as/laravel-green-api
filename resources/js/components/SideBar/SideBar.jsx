@@ -9,8 +9,8 @@ const SideBar = ({
   priceRange = { min: 0, max: 1000 },
   isGift = false,
   giftFilters = {},
-  onFilterChange = () => {},
-  onApplyFilters = () => {},
+  onFilterChange = () => { },
+  onApplyFilters = () => { },
   initialFilters = {}
 }) => {
   const { i18n } = useTranslation();
@@ -54,11 +54,11 @@ const SideBar = ({
       <div className="filter-options">
         {items.map((item) => {
           const itemId = item.id || item.value;
-          const itemName = item.name || item.label || 
-            (filterKey === 'categories' ? (isRTL ? item.category_ar : item.category_en) : 
-             filterKey === 'sizes' ? (isRTL ? item.size_ar : item.size_en) :
-             filterKey === 'colors' ? (isRTL ? item.color_ar : item.color_en) : '');
-          
+          const itemName = item.name || item.label ||
+            (filterKey === 'categories' ? (isRTL ? item.category_ar : item.category_en) :
+              filterKey === 'sizes' ? (isRTL ? item.size_ar : item.size_en) :
+                filterKey === 'colors' ? (isRTL ? item.color_ar : item.color_en) : '');
+
           return (
             <div key={itemId} className="form-check">
               <input
@@ -68,8 +68,8 @@ const SideBar = ({
                 checked={filters[filterKey].includes(itemId)}
                 onChange={(e) => handleFilterChange(filterKey, itemId, e.target.checked)}
               />
-              <label 
-                className="form-check-label" 
+              <label
+                className="form-check-label"
                 htmlFor={`${filterKey}-${itemId}`}
               >
                 {itemName}
@@ -88,16 +88,58 @@ const SideBar = ({
         {colors.map((color) => {
           const colorName = isRTL ? color.color_ar : color.color_en;
           return (
-            <div key={color.id} className="col-6">
-              <button
-                type="button"
-                className={`color-option w-100 ${filters.colors.includes(color.id) ? 'selected' : ''}`}
+            <div key={color.id} className="col-4">
+              <div
+                className={`color-icon-container ${filters.colors.includes(color.id) ? 'selected' : ''}`}
                 onClick={() => handleFilterChange('colors', color.id)}
-                style={{ backgroundColor: color.hex_code }}
+                style={{
+                  alignSelf: 'stretch',
+                  padding: '8px 4px',
+                  borderRadius: 5,
+                  outline: filters.colors.includes(color.id) ? '2px solid #6F816E' : '1px solid #C3D9C3',
+                  outlineOffset: '-1px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 5,
+                  cursor: 'pointer'
+                }}
               >
-                <span className="color-swatch" style={{ backgroundColor: color.hex_code }}></span>
-                <span className="color-label">{colorName}</span>
-              </button>
+                {color.icon ? (
+                  <img
+                    src={`/${color.icon}`}
+                    alt={colorName}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      objectFit: 'contain'
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: 18,
+                      height: 18,
+                      backgroundColor: color.hex_code,
+                      borderRadius: '50%'
+                    }}
+                  />
+                )}
+                <div
+                  style={{
+                    textAlign: 'center',
+                    color: '#6F816E',
+                    fontSize: 12,
+                    fontFamily: 'El Messiri',
+                    fontWeight: '400',
+                    lineHeight: '15.6px',
+                    wordWrap: 'break-word'
+                  }}
+                >
+                  {colorName}
+                </div>
+              </div>
             </div>
           );
         })}
@@ -166,26 +208,26 @@ const SideBar = ({
   return (
     <div className={`sidebar-container ${isRTL ? 'rtl' : 'ltr'}`}>
       <h3 className="filter-title">{isRTL ? 'تصفية المنتجات' : 'Filter Products'}</h3>
-      
+
       {categories.length > 0 && renderCheckboxSection(
         isRTL ? 'الفئات' : 'Categories',
         categories,
         'categories'
       )}
-      
+
       {colors.length > 0 && renderColorSection()}
-      
+
       {sizes.length > 0 && renderCheckboxSection(
         isRTL ? 'الأحجام' : 'Sizes',
         sizes,
         'sizes'
       )}
-      
+
       {renderPriceSection()}
-      
+
       {renderGiftFilters()}
-      
-      <button 
+
+      <button
         className="btn btn-primary filter-apply-btn w-100 mt-4"
         onClick={() => onApplyFilters(filters)}
       >
