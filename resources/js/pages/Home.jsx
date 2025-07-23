@@ -79,7 +79,7 @@ const Home = () => {
             <HomeHero />
             <CatSlider />
             <div className="container my-5">
-                <h2 className="text-start mb-4">{t('latestAddedProducts') || 'أحدث المنتجات المضافة'}</h2>
+                <h2 className="mb-4">{t('latestAddedProducts') || 'أحدث المنتجات المضافة'}</h2>
                 {loading ? (
                     <div className="text-center py-5">
                         <div className="spinner-border text-primary" role="status">
@@ -134,7 +134,7 @@ const Home = () => {
 
             {/* Second Products Section */}
             <div className="container my-5">
-                <h2 className="text-start mb-4">{t('latestAddedProducts') || 'أحدث المنتجات المضافة'}</h2>
+                <h2 className="mb-4">{t('latestAddedProducts') || 'أحدث المنتجات المضافة'}</h2>
                 {loading ? (
                     <div className="text-center py-5">
                         <div className="spinner-border text-primary" role="status">
@@ -164,7 +164,6 @@ const Home = () => {
                                 <ProductCard
                                     product={{
                                         id: product.id,
-                                        name: product.name,
                                         name_ar: product.name_ar,
                                         name_en: product.name_en,
                                         latin_name: product.name_latin,

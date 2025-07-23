@@ -171,7 +171,12 @@ const ProductCard = ({
                 ) : (
                   <span className="current-price">{current_price || price}</span>
                 )}
-                <span className="currency">{t('sar')}</span>
+                <span className="currency">
+                  <img
+                    src="/assets/images/sar.svg"
+                    alt="Cart"
+                    className="cart-icon"
+                  /></span>
               </div>
             </div>
 
