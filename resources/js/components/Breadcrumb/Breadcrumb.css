@@ -3,7 +3,7 @@
   border-radius: 5px;
   padding: 16px 80px;
   width: 100%;
-  direction: ltr;
+  /* direction: ltr; */
 }
 
 .breadcrumb-wrapper {
@@ -12,8 +12,8 @@
   gap: 12px;
 }
 
-[dir="rtl"] .breadcrumb-wrapper {
-  justify-content: flex-end;
+.breadcrumb-wrapper {
+  justify-content: flex-start;
 }
 
 .breadcrumb-item {
