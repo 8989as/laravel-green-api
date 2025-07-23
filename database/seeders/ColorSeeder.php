@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Color;
+use Illuminate\Database\Seeder;
 
 class ColorSeeder extends Seeder
 {
@@ -18,6 +17,7 @@ class ColorSeeder extends Seeder
             ['color_en' => 'Blue', 'color_ar' => 'أزرق', 'hex_code' => '#0000FF', 'icon' => 'colors/blue-016eff.svg'],
             ['color_en' => 'Green', 'color_ar' => 'أخضر', 'hex_code' => '#008000', 'icon' => 'colors/green-0e9c0e.svg'],
             ['color_en' => 'Black', 'color_ar' => 'أسود', 'hex_code' => '#000000', 'icon' => 'colors/black-000000.svg'],
+            ['color_en' => 'White', 'color_ar' => 'أبيض', 'hex_code' => '#FFFFFF', 'icon' => 'colors/white-ffffff.svg'],
         ]);
     }
 }
