@@ -4,6 +4,7 @@ import '../components/contact.css';
 import { useTranslation } from 'react-i18next';
 import { faPhone, faEnvelope, faMapPin } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Breadcrumb from "../components/Breadcrumb/Breadcrumb";
 
 const Contact = () => {
   const { t, i18n } = useTranslation();
@@ -11,6 +12,10 @@ const Contact = () => {
   return (
     <>
       <Navbar />
+      <Breadcrumb items={[
+                { label: t('home'), url: '/' },
+                { label: t('contact'), active: true }
+            ]} />
       <div className="container my-5" dir={isRTL ? 'rtl' : 'ltr'}>
         <h1 className="contact-heading text-center mb-4">{isRTL ? 'تواصل معنا - فريقنا جاهز لخدمتك' : 'Contact Us - Our Team is Ready to Help You'}</h1>
         <p className="contact-subheading text-center mb-5">{isRTL ? 'سواء كان عندك استفسار عن نباتاتنا، أو تحتاج مساعدة في الطلب، فريقنا موجود عشانك.' : 'Whether you have questions about our plants or need help with an order, our team is here for you.'}</p>

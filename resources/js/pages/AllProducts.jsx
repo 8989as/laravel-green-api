@@ -302,10 +302,10 @@ const AllProducts = () => {
     return (
         <>
             <Navbar />
-            <Breadcrumb
-                items={[t('home') || 'الرئيسية', t('allProducts') || 'كل المنتجات']}
-                lang={i18n.language}
-            />
+               <Breadcrumb items={[
+                { label: t('home'), url: '/' },
+                { label: t('allProducts'), active: true }
+            ]} />
 
             <div className={`all-products-container ${isRTL ? 'rtl' : 'ltr'} p-4`}>
                 <div className="row">
@@ -328,7 +328,7 @@ const AllProducts = () => {
                         {/* Header */}
                         <div className="d-flex justify-content-start align-items-start mb-4">
                             <h1 className="mb-0">{t('allProducts') || 'كل المنتجات'}</h1>
-                            {!loading && products.length > 0 && (
+                            {/* {!loading && products.length > 0 && (
                                 <div className="text-muted">
                                     {t('showingResults', {
                                         from: pagination.from,
@@ -336,7 +336,7 @@ const AllProducts = () => {
                                         total: pagination.total
                                     }) || `عرض ${pagination.from}-${pagination.to} من ${pagination.total} منتج`}
                                 </div>
-                            )}
+                            )} */}
                         </div>
 
                         {/* Loading State */}
