@@ -1,20 +1,20 @@
 /* Import Google Font */
 @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap');
 
-/* --- General and Typography Styles --- */
+/* --- Typography Styles --- */
 
 .title {
     font-family: 'El Messiri', sans-serif;
     color: #224921;
     font-size: 36px;
     font-weight: 600;
-    line-height: 48.60px;
+    line-height: 1.35;
 }
 
 .paragraph {
     font-family: 'El Messiri', sans-serif;
     font-size: 24px;
-    line-height: 38.40px;
+    line-height: 1.6;
 }
 
 .textGrey {
@@ -31,21 +31,14 @@
     text-decoration: underline;
 }
 
-
-/* --- Image Styles --- */
-
-.image {
-    border-radius: 15px;
-    object-fit: cover; /* Ensures images fill the space without distortion */
-}
-
-
 /* --- Info Tag Styles --- */
 
 .infoTag {
     background: #ECF3EC;
     border-radius: 5px;
     padding: 12px 24px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .infoTagText {
@@ -53,5 +46,4 @@
     font-size: 16px;
     font-family: 'El Messiri', sans-serif;
     font-weight: 500;
-    line-height: 16px;
 }
