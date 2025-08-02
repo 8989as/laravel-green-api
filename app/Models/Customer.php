@@ -4,28 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
 
 class Customer extends Model
 {
     use HasFactory;
 
+    use HasApiTokens;
+
     protected $fillable = [
-        'name', 'email', 'address', 'phone', 'user_id'
+        'name',
+        'phone_number',
+        'phone_verified_at',
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    protected $casts = [
+        'phone_verified_at' => 'datetime',
+    ];
 
-    public function orders()
+    public function isPhoneVerified()
     {
-        return $this->hasMany(Order::class);
-    }
-
-    public function favorites()
-    {
-        return $this->belongsToMany(Product::class, 'customer_favorites', 'customer_id', 'product_id')
-                    ->withTimestamps();
+        return !is_null($this->phone_verified_at);
     }
 }

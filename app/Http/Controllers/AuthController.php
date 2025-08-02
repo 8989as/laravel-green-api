@@ -2,161 +2,108 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Customer;
+use App\Services\VonageService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    protected $vonageService;
+
+    public function __construct(VonageService $vonageService)
+    {
+        $this->vonageService = $vonageService;
+    }
+
+    /**
+     * Register a new user with OTP verification
+     */
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
+            'phone_number' => 'required|string|unique:customers,phone_number',
+            'otp' => 'required|string',
         ]);
-
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['error' => $validator->errors()], 422);
         }
 
-        $user = User::create([
+        // Verify OTP
+        $cachedOtp = Cache::get('otp_'.$request->phone_number);
+        if (! $cachedOtp || $cachedOtp != $request->otp) {
+            return response()->json(['error' => 'Invalid or expired OTP'], 401);
+        }
+
+        // Create new customer
+        $customer = Customer::create([
             'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'phone_number' => $request->phone_number,
         ]);
 
-        // Create associated customer record
-        Customer::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'user_id' => $user->id,
-        ]);
-
-        Auth::login($user);
+        $token = $customer->createToken('auth_token')->plainTextToken;
+        Cache::forget('otp_'.$request->phone_number);
 
         return response()->json([
-            'success' => true,
             'message' => 'Registration successful',
-            'user' => $user,
+            'token' => $token,
+            'customer' => $customer,
         ]);
     }
 
+    /**
+     * Login with OTP verification
+     */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
+            'phone_number' => 'required|string|exists:customers,phone_number',
+            'otp' => 'required|string',
         ]);
-
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['error' => $validator->errors()], 422);
         }
 
-        if (Auth::attempt($request->only('email', 'password'))) {
-            $user = Auth::user();
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'user' => $user,
-            ]);
+        // Verify OTP
+        $cachedOtp = Cache::get('otp_'.$request->phone_number);
+        if (! $cachedOtp || $cachedOtp != $request->otp) {
+            return response()->json(['error' => 'Invalid or expired OTP'], 401);
         }
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid credentials'
-        ], 401);
-    }
+        // Find existing customer
+        $customer = Customer::where('phone_number', $request->phone_number)->first();
+        if (! $customer) {
+            return response()->json(['error' => 'Customer not found'], 404);
+        }
 
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $token = $customer->createToken('auth_token')->plainTextToken;
+        Cache::forget('otp_'.$request->phone_number);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Logged out successfully'
+            'message' => 'Login successful',
+            'token' => $token,
+            'customer' => $customer,
         ]);
     }
 
-    public function user(Request $request)
-    {
-        return response()->json([
-            'user' => $request->user(),
-            'isAuthenticated' => Auth::check(),
-        ]);
-    }
-
-    public function sendOTP(Request $request)
+    /**
+     * Send OTP to phone number
+     */
+    public function sendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|max:20',
+            'phone_number' => 'required|string',
         ]);
-
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['error' => $validator->errors()], 422);
         }
 
-        // TODO: Implement actual OTP sending logic
-        // For now, we'll simulate OTP sending
-        $otp = rand(1000, 9999);
-        
-        // Store OTP in session for verification
-        session(['otp' => $otp, 'otp_phone' => $request->phone]);
+        $otp = random_int(100000, 999999);
+        Cache::put('otp_'.$request->phone_number, $otp, now()->addMinutes(5));
+        $this->vonageService->sendOtp($request->phone_number, $otp);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'OTP sent successfully',
-            'otp' => $otp, // Remove this in production
-        ]);
-    }
-
-    public function verifyOTP(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|max:20',
-            'otp' => 'required|string|size:4',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $sessionOtp = session('otp');
-        $sessionPhone = session('otp_phone');
-
-        if ($sessionOtp && $sessionPhone === $request->phone && $sessionOtp == $request->otp) {
-            // Clear OTP from session
-            session()->forget(['otp', 'otp_phone']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'OTP verified successfully',
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Invalid OTP'
-        ], 401);
+        return response()->json(['message' => 'OTP sent to WhatsApp']);
     }
 }

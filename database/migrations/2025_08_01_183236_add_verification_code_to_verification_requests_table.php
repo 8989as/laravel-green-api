@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('phone_number')->unique();
-            
-            $table->timestamps();
+        Schema::table('verification_requests', function (Blueprint $table) {
+            $table->string('verification_code', 10)->nullable()->after('request_id');
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::table('verification_requests', function (Blueprint $table) {
+            $table->dropColumn('verification_code');
+        });
     }
 };
