@@ -1,338 +1,197 @@
 import axios from 'axios';
 
-// Base API URL - replace with your actual Laravel API endpoint
-const API_URL = 'http://127.0.0.1:8000';
-
-// Helper to get the auth token if needed
-const getAuthToken = () => {
-  return localStorage.getItem('auth_token');
-};
-
-// Helper to create common headers
-const createHeaders = () => {
-  const token = getAuthToken();
-  return {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` })
-  };
-};
-
-// Helper to check if user is authenticated
-const isAuthenticated = () => {
-  return !!localStorage.getItem('auth_token');
-};
-
-// API service for checkout operations
-const CheckoutService = {
-  // Save shipping address during checkout
-  saveAddress: async (addressData) => {
-    try {
-      const token = getAuthToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      // According to Bagisto API, endpoint is POST /api/v1/customer/checkout/save-address
-      const payload = {
-        billing: {
-          first_name: addressData.firstName,
-          last_name: addressData.lastName,
-          email: addressData.email,
-          address1: addressData.address,
-          city: addressData.city,
-          postcode: addressData.postalCode,
-          phone: addressData.phone,
-          country: addressData.country,
-          state: addressData.state || '',
-          company_name: addressData.companyName || '',
-          address2: addressData.address2 || '',
-          use_for_shipping: addressData.sameForShipping || true
+class CheckoutService {
+    // Get checkout data (cart items, shipping options, payment methods)
+    static async getCheckoutData() {
+        try {
+            const response = await axios.get('/api/checkout');
+            return {
+                success: true,
+                data: response.data
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to load checkout data'
+            };
         }
-      };
-      
-      // If shipping address is different
-      if (!addressData.sameForShipping) {
-        payload.shipping = {
-          first_name: addressData.shippingFirstName,
-          last_name: addressData.shippingLastName,
-          email: addressData.shippingEmail,
-          address1: addressData.shippingAddress,
-          city: addressData.shippingCity,
-          postcode: addressData.shippingPostalCode,
-          phone: addressData.shippingPhone,
-          country: addressData.shippingCountry,
-          state: addressData.shippingState || '',
-          company_name: addressData.shippingCompanyName || '',
-          address2: addressData.shippingAddress2 || ''
+    }
+
+    // Get available payment methods
+    static async getPaymentMethods() {
+        try {
+            const response = await axios.get('/api/checkout/payment-methods');
+            return {
+                success: true,
+                methods: response.data.payment_methods || response.data || []
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to load payment methods'
+            };
+        }
+    }
+
+    // Get shipping options
+    static async getShippingOptions(address = null) {
+        try {
+            const response = await axios.post('/api/checkout/shipping-options', {
+                address: address
+            });
+            return {
+                success: true,
+                options: response.data.shipping_options || response.data || []
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to load shipping options'
+            };
+        }
+    }
+
+    // Apply coupon code
+    static async applyCoupon(couponCode) {
+        try {
+            const response = await axios.post('/api/checkout/apply-coupon', {
+                coupon_code: couponCode
+            });
+            return {
+                success: true,
+                data: response.data
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Invalid coupon code'
+            };
+        }
+    }
+
+    // Remove coupon
+    static async removeCoupon() {
+        try {
+            const response = await axios.post('/api/checkout/remove-coupon');
+            return {
+                success: true,
+                data: response.data
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to remove coupon'
+            };
+        }
+    }
+
+    // Calculate order total
+    static async calculateTotal(data) {
+        try {
+            const response = await axios.post('/api/checkout/calculate', {
+                shipping_method: data.shippingMethod,
+                payment_method: data.paymentMethod,
+                address: data.address,
+                coupon_code: data.couponCode
+            });
+            return {
+                success: true,
+                total: response.data
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to calculate total'
+            };
+        }
+    }
+
+    // Process checkout
+    static async processCheckout(checkoutData) {
+        try {
+            const response = await axios.post('/api/checkout', {
+                shipping_address: checkoutData.shippingAddress,
+                billing_address: checkoutData.billingAddress,
+                shipping_method: checkoutData.shippingMethod,
+                payment_method: checkoutData.paymentMethod,
+                payment_details: checkoutData.paymentDetails,
+                coupon_code: checkoutData.couponCode,
+                notes: checkoutData.notes
+            });
+
+            return {
+                success: true,
+                order: response.data.order || response.data,
+                message: response.data.message || 'Order placed successfully'
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to process checkout'
+            };
+        }
+    }
+
+    // Validate checkout data
+    static validateCheckoutData(data) {
+        const errors = [];
+
+        // Validate shipping address
+        if (!data.shippingAddress) {
+            errors.push('Shipping address is required');
+        } else {
+            if (!data.shippingAddress.name) errors.push('Name is required');
+            if (!data.shippingAddress.phone) errors.push('Phone number is required');
+            if (!data.shippingAddress.address) errors.push('Address is required');
+            if (!data.shippingAddress.city) errors.push('City is required');
+        }
+
+        // Validate payment method
+        if (!data.paymentMethod) {
+            errors.push('Payment method is required');
+        }
+
+        // Validate shipping method
+        if (!data.shippingMethod) {
+            errors.push('Shipping method is required');
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors: errors
         };
-      }
-      
-      const response = await axios.post(
-        `${API_URL}/api/v1/customer/checkout/save-address`,
-        payload,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error saving address:', error);
-      throw error;
     }
-  },
 
-  // Save shipping method during checkout
-  saveShipping: async (shippingData) => {
-    try {
-      const token = getAuthToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      // According to Bagisto API, endpoint is POST /api/v1/customer/checkout/save-shipping
-      const payload = {
-        shipping_method: shippingData.shippingMethod
-      };
-      
-      const response = await axios.post(
-        `${API_URL}/api/v1/customer/checkout/save-shipping`,
-        payload,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error saving shipping method:', error);
-      throw error;
+    // Format address for API
+    static formatAddress(address) {
+        return {
+            name: address.name || '',
+            phone: address.phone || '',
+            email: address.email || '',
+            address: address.address || '',
+            city: address.city || '',
+            state: address.state || '',
+            postal_code: address.postal_code || '',
+            country: address.country || 'SA',
+            is_default: address.is_default || false
+        };
     }
-  },
 
-  // Save payment method during checkout
-  savePayment: async (paymentData) => {
-    try {
-      const token = getAuthToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      // According to Bagisto API, endpoint is POST /api/v1/customer/checkout/save-payment
-      const payload = {
-        payment: {
-          method: paymentData.paymentMethod
+    // Get order status
+    static async getOrderStatus(orderId) {
+        try {
+            const response = await axios.get(`/api/checkout/order-status/${orderId}`);
+            return {
+                success: true,
+                status: response.data
+            };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Failed to get order status'
+            };
         }
-      };
-      
-      const response = await axios.post(
-        `${API_URL}/api/v1/customer/checkout/save-payment`,
-        payload,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error saving payment method:', error);
-      throw error;
     }
-  },
-
-  // Check minimum order requirements
-  checkMinimumOrder: async () => {
-    try {
-      const token = getAuthToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      
-      // According to Bagisto API, endpoint is POST /api/v1/customer/checkout/check-minimum-order
-      const response = await axios.post(
-        `${API_URL}/api/v1/customer/checkout/check-minimum-order`,
-        {},
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error checking minimum order:', error);
-      throw error;
-    }
-  },
-
-  // Submit an order to the backend
-  submitOrder: async (orderData) => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is POST /api/v1/customer/checkout/save-order
-      const response = await axios.post(
-        `${API_URL}/api/v1/customer/checkout/save-order`,
-        orderData || {},
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error submitting order:', error);
-      throw error;
-    }
-  },
-
-  // Get a list of all orders for the current user
-  getOrders: async () => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/orders
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/orders`, 
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      throw error;
-    }
-  },
-
-  // Get a specific order by ID
-  getOrder: async (orderId) => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/orders/{id}
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/orders/${orderId}`, 
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching order #${orderId}:`, error);
-      throw error;
-    }
-  },
-
-  // Cancel an order
-  cancelOrder: async (orderId) => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is POST /api/v1/customer/orders/{id}/cancel
-      const response = await axios.post(
-        `${API_URL}/api/v1/customer/orders/${orderId}/cancel`,
-        {},
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error cancelling order #${orderId}:`, error);
-      throw error;
-    }
-  },
-
-  // Reorder a previous order
-  reorderItems: async (orderId) => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/orders/reorder/{id}
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/orders/reorder/${orderId}`,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error reordering order #${orderId}:`, error);
-      throw error;
-    }
-  },
-
-  // Get invoices
-  getInvoices: async () => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/invoices
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/invoices`,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching invoices:', error);
-      throw error;
-    }
-  },
-
-  // Get a specific invoice by ID
-  getInvoice: async (invoiceId) => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/invoices/{id}
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/invoices/${invoiceId}`,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching invoice #${invoiceId}:`, error);
-      throw error;
-    }
-  },
-
-  // Get shipments
-  getShipments: async () => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/shipments
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/shipments`,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching shipments:', error);
-      throw error;
-    }
-  },
-
-  // Get a specific shipment by ID
-  getShipment: async (shipmentId) => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/shipments/{id}
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/shipments/${shipmentId}`,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching shipment #${shipmentId}:`, error);
-      throw error;
-    }
-  },
-
-  // Get transactions
-  getTransactions: async () => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/transactions
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/transactions`,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-      throw error;
-    }
-  },
-
-  // Get a specific transaction by ID
-  getTransaction: async (transactionId) => {
-    try {
-      const headers = createHeaders();
-      
-      // According to Bagisto API, endpoint is GET /api/v1/customer/transactions/{id}
-      const response = await axios.get(
-        `${API_URL}/api/v1/customer/transactions/${transactionId}`,
-        { headers }
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching transaction #${transactionId}:`, error);
-      throw error;
-    }
-  }
-};
+}
 
 export default CheckoutService;

@@ -1,13 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { useTranslation } from 'react-i18next';
-import apiService from '../services/apiService';
-import api from '../services/api';
 
-// Create the context
 const AuthContext = createContext();
 
-// Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -15,141 +10,44 @@ export const useAuth = () => {
   }
   return context;
 };
-// Check if user is authenticated
-export const isAuthenticated = () => {
-  const token = localStorage.getItem('auth_token');
-  if (token) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    return true;
-  } else {
-    delete axios.defaults.headers.common['Authorization'];
-    delete api.defaults.headers.common['Authorization'];
-    return false;
-  }
-};
-// PhoneAuth provider component
+
 export const AuthProvider = ({ children }) => {
-  const { t } = useTranslation();
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('auth_token'));
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [otpSent, setOtpSent] = useState(false);
 
-  // Check if user is already logged in on initial load
+  // Configure axios defaults
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
     if (token) {
-      // Set the token for both axios instances
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchCurrentUser();
+      setIsAuthenticated(true);
+      // You might want to validate the token here by making a request to get user info
     } else {
-      setLoading(false);
-    }
-  }, []);
-
-  // Fetch the current user's data
-  // const fetchCurrentUser = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const endpoints = [
-  //       async () => {
-  //         const response = await api.get('/api/v1/customer/profile');
-  //         if (response?.data?.customer.id) {
-  //           console.log('Customer data fetched:', response.data.customer);
-  //           return response.data.customer;
-  //         }
-  //         throw new Error('No customer data found');
-  //       },
-  //       async () => {
-  //         const response = await api.get('/api/customer/get');
-  //         if (response?.customer) {
-  //           return response.customer;
-  //         }
-  //         throw new Error('No customer data found');
-  //       },
-  //       async () => {
-  //         const response = await api.get('/api/user');
-  //         if (response) {
-  //           return response;
-  //         }
-  //         throw new Error('No user data found');
-  //       }
-  //     ];
-  //     for (const getUser of endpoints) {
-  //       try {
-  //         const userData = await getUser();
-  //         setUser(userData);
-  //         return;
-  //       } catch (endpointErr) {
-  //         console.log('Endpoint failed, trying next one...');
-  //       }
-  //     }
-  //     throw new Error('Could not retrieve user data from any endpoint');
-  //   } catch (err) {
-  //     console.error('Error fetching user:', err);
-  //     localStorage.removeItem('auth_token');
-  //     delete axios.defaults.headers.common['Authorization'];
-  //     delete api.defaults.headers.common['Authorization'];
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  const fetchCurrentUser = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await apiService.getUser();
-      const userData = response.data.user;
-      if (!userData) {
-        throw new Error('No user data found');
-      }
-      setUser(userData);
-    } catch (err) {
-      console.error('Error fetching user:', err);
-      setUser(null);
-      localStorage.removeItem('auth_token');
       delete axios.defaults.headers.common['Authorization'];
-    } finally {
-      setLoading(false);
+      setIsAuthenticated(false);
     }
-  };
+    setLoading(false);
+  }, [token]);
 
-  // Send OTP for login/verification
-  const sendOTP = async (phone) => {
+  // Send OTP to phone number
+  const sendOtp = async (phoneNumber) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await apiService.sendOTP(phone);
+
+      const response = await axios.post('/api/send-otp', {
+        phone_number: phoneNumber
+      });
+
       setOtpSent(true);
-      return response.data.success;
+      return { success: true, message: response.data.message };
     } catch (err) {
-      setError(err.response?.data?.message || t('failedToSendOTP'));
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Verify OTP and get token
-  const verifyOTP = async (phone, otp) => {
-    try {
-      setError(null);
-      setLoading(true);
-      const response = await apiService.verifyOTP(phone, otp);
-      
-      if (response.data.success) {
-        setOtpSent(false);
-        // After OTP verification, fetch user data
-        await fetchCurrentUser();
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error('OTP verification error:', err);
-      setError(err.response?.data?.message || err.message || t('invalidOTP'));
-      return false;
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to send OTP';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -160,85 +58,103 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await apiService.register(userData);
-      
-      if (response.data.success) {
-        setUser(response.data.user);
-        localStorage.setItem('auth_token', response.data.token || 'temp_token');
-        return true;
-      }
-      return false;
+
+      const response = await axios.post('/api/register', {
+        name: `${userData.first_name} ${userData.last_name}`.trim(),
+        phone_number: userData.phone_number,
+        otp: userData.otp
+      });
+
+      const { token: authToken, customer } = response.data;
+
+      // Store token and user data
+      localStorage.setItem('auth_token', authToken);
+      setToken(authToken);
+      setUser(customer);
+      setIsAuthenticated(true);
+      setOtpSent(false);
+
+      return { success: true, user: customer };
     } catch (err) {
-      setError(err.response?.data?.message || t('registrationFailed'));
-      return false;
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Registration failed';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  // Login with email/password
-  const login = async (credentials) => {
+  // Login existing user
+  const login = async (userData) => {
     try {
       setError(null);
       setLoading(true);
-      const response = await apiService.login(credentials);
-      
-      if (response.data.success) {
-        setUser(response.data.user);
-        localStorage.setItem('auth_token', response.data.token || 'temp_token');
-        return true;
-      }
-      return false;
+
+      const response = await axios.post('/api/login', {
+        phone_number: userData.phone_number,
+        otp: userData.otp
+      });
+
+      const { token: authToken, customer } = response.data;
+
+      // Store token and user data
+      localStorage.setItem('auth_token', authToken);
+      setToken(authToken);
+      setUser(customer);
+      setIsAuthenticated(true);
+      setOtpSent(false);
+
+      return { success: true, user: customer };
     } catch (err) {
-      setError(err.response?.data?.message || t('loginFailed'));
-      return false;
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Login failed';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
   };
 
-  // Logout
-  const logout = async () => {
-    try {
-      setLoading(true);
-      if (user) {
-        await apiService.logout();
-      }
-    } catch (err) {
-      console.error('Logout error:', err);
-    } finally {
-      // Clear all auth data regardless of the logout API result
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('bagisto_cart_id');
-
-      // Clear authorization headers
-      delete axios.defaults.headers.common['Authorization'];
-
-      setUser(null);
-      setLoading(false);
-    }
+  // Logout user
+  const logout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('temp_phone');
+    localStorage.removeItem('temp_user_data');
+    setToken(null);
+    setUser(null);
+    setIsAuthenticated(false);
+    setOtpSent(false);
+    setError(null);
+    delete axios.defaults.headers.common['Authorization'];
   };
 
-  // Reset state after errors or when needed
+  // Reset auth state
   const resetState = () => {
     setError(null);
     setOtpSent(false);
   };
 
+  // Check if user is authenticated (for route protection)
+  const requireAuth = () => {
+    return isAuthenticated;
+  };
+
+  const value = {
+    user,
+    token,
+    isAuthenticated,
+    loading,
+    error,
+    otpSent,
+    sendOtp,
+    register,
+    login,
+    logout,
+    resetState,
+    requireAuth
+  };
+
   return (
-    <AuthContext.Provider value={{
-      user,
-      loading,
-      error,
-      otpSent,
-      login,
-      sendOTP,
-      verifyOTP,
-      register,
-      logout,
-      resetState,
-      isAuthenticated: !!user
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

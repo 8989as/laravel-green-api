@@ -2,56 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Breadcrumb from '../components/Breadcrumb/Breadcrumb';
 import { useOrders } from '../contexts/OrderContext';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faSpinner,
-  faExclamationTriangle,
-  faShoppingBag,
-  faSearch,
-  faEye,
-  faTruck,
-  faTimes,
-  faRedo
-} from '@fortawesome/free-solid-svg-icons';
+// Simple icon components to replace FontAwesome
+const SpinnerIcon = () => <div className="spinner-border spinner-border-sm" role="status"><span className="visually-hidden">Loading...</span></div>;
+const WarningIcon = () => <span>⚠️</span>;
+const ShoppingBagIcon = () => <span>🛍️</span>;
+const EyeIcon = () => <span>👁️</span>;
+const TruckIcon = () => <span>🚚</span>;
+const TimesIcon = () => <span>❌</span>;
+const RedoIcon = () => <span>🔄</span>;
 
 const Orders = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-  
+
   // Use OrderContext
-  const { 
-    orders, 
-    currentOrder, 
-    loading, 
-    error, 
-    fetchOrders: getOrders, 
-    fetchOrder: getOrder, 
+  const {
+    orders,
+    currentOrder,
+    loading,
+    error,
+    fetchOrders: getOrders,
+    fetchOrder: getOrder,
     cancelOrder: cancelOrderById,
     reorderItems: reorderById
   } = useOrders();
-  
+
   // Local state
   const [orderDetails, setOrderDetails] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [trackingInfo, setTrackingInfo] = useState(null);
-  
+
   // Breadcrumb items
   const breadcrumbItems = [
     { label: t('home'), url: '/' },
     { label: t('myAccount'), url: '/account' },
     { label: t('myOrders'), url: '/orders', active: true }
   ];
-  
+
   // Fetch orders on component mount
   useEffect(() => {
     getOrders();
   }, [getOrders]);
-  
+
   // Fetch order details
   const fetchOrderDetails = async (orderId) => {
     setSelectedOrderId(orderId);
     setTrackingInfo(null);
-    
+
     try {
       await getOrder(orderId);
       setOrderDetails(currentOrder);
@@ -59,11 +56,11 @@ const Orders = () => {
       console.error(`Error fetching details for order #${orderId}:`, err);
     }
   };
-  
+
   // Track order
   const trackOrder = async (orderId) => {
     setTrackingInfo(null);
-    
+
     try {
       // Use the order data as tracking info since Bagisto API doesn't have a specific tracking endpoint
       await getOrder(orderId);
@@ -72,7 +69,7 @@ const Orders = () => {
       console.error(`Error tracking order #${orderId}:`, err);
     }
   };
-  
+
   // Cancel order
   const handleCancelOrder = async (orderId) => {
     try {
@@ -85,7 +82,7 @@ const Orders = () => {
       console.error(`Error cancelling order #${orderId}:`, err);
     }
   };
-  
+
   // Reorder items from a previous order
   const handleReorderItems = async (orderId) => {
     try {
@@ -96,19 +93,19 @@ const Orders = () => {
       console.error(`Error reordering items from order #${orderId}:`, err);
     }
   };
-  
+
   // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat(i18n.language, {
-      year: 'numeric', 
-      month: 'short', 
+      year: 'numeric',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     }).format(date);
   };
-  
+
   // Get status badge class
   const getStatusBadgeClass = (status) => {
     switch (status.toLowerCase()) {
@@ -126,7 +123,7 @@ const Orders = () => {
         return 'bg-secondary';
     }
   };
-  
+
   return (
     <>
       <Breadcrumb items={breadcrumbItems} />
@@ -134,22 +131,21 @@ const Orders = () => {
         <div className="row">
           <div className="col-12">
             <h1 className="mb-4">{t('myOrders')}</h1>
-            
+
             {error && (
               <div className="alert alert-danger" role="alert">
-                <FontAwesomeIcon icon={faExclamationTriangle} className="me-2" />
-                {error}
+                <WarningIcon /> {error}
               </div>
             )}
           </div>
         </div>
-        
+
         <div className="row">
           {/* Order List - Left Side */}
           <div className="col-lg-8">
             {loading ? (
               <div className="text-center py-5">
-                <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+                <SpinnerIcon />
                 <p className="mt-3">{t('loadingOrders')}</p>
               </div>
             ) : orders.length > 0 ? (
@@ -168,60 +164,57 @@ const Orders = () => {
                       </thead>
                       <tbody>
                         {orders.map((order) => (
-                          <tr 
-                            key={order.id} 
+                          <tr
+                            key={order.id}
                             className={selectedOrderId === order.id ? 'table-active' : ''}
                           >
                             <td>#{order.id}</td>
                             <td>{formatDate(order.created_at)}</td>
                             <td>
                               {order.total}
-                              <img 
-                                src="/assets/images/sar.svg" 
-                                alt="SAR" 
-                                className="price-symbol-img" 
+                              <img
+                                src="/assets/images/sar.svg"
+                                alt="SAR"
+                                className="price-symbol-img"
                               />
                             </td>
                             <td>
-                              <span 
+                              <span
                                 className={`badge ${getStatusBadgeClass(order.status)}`}
                               >
                                 {order.status}
                               </span>
                             </td>
                             <td className="text-end">
-                              <button 
+                              <button
                                 className="btn btn-sm btn-outline-primary me-2"
                                 onClick={() => fetchOrderDetails(order.id)}
                               >
-                                <FontAwesomeIcon icon={faEye} className="me-1" />
-                                {t('view')}
+                                <EyeIcon /> {t('view')}
                               </button>
                               <div>
                                 {['processing', 'shipped'].includes(order.status.toLowerCase()) && (
-                                  <button 
+                                  <button
                                     className="btn btn-sm btn-outline-success me-1"
                                     onClick={() => trackOrder(order.id)}
                                   >
-                                    <FontAwesomeIcon icon={faTruck} className="me-1" />
-                                    {t('track')}
+                                    <TruckIcon /> {t('track')}
                                   </button>
                                 )}
                                 {['pending', 'processing'].includes(order.status.toLowerCase()) && (
-                                  <button 
+                                  <button
                                     className="btn btn-sm btn-outline-danger me-1"
-                                    onClick={() => cancelOrder(order.id)}
+                                    onClick={() => handleCancelOrder(order.id)}
                                   >
-                                    <FontAwesomeIcon icon={faTimes} className="me-1" />
-                                    {t('cancel')}
+                                    <TimesIcon /> {t('cancel')}
                                   </button>
                                 )}
                                 {['delivered', 'completed'].includes(order.status.toLowerCase()) && (
-                                  <button 
+                                  <button
                                     className="btn btn-sm btn-outline-primary"
-                                    onClick={() => reorderItems(order.id)}
+                                    onClick={() => handleReorderItems(order.id)}
                                   >
-                                    <FontAwesomeIcon icon={faRedo} className="me-1" />
+                                    <RedoIcon />
                                     {t('reorder')}
                                   </button>
                                 )}
@@ -237,7 +230,7 @@ const Orders = () => {
             ) : (
               <div className="text-center py-5 card border-0 shadow-sm">
                 <div className="card-body">
-                  <FontAwesomeIcon icon={faShoppingBag} size="3x" className="text-muted mb-3" />
+                  <div className="mb-3" style={{ fontSize: '3rem' }}><ShoppingBagIcon /></div>
                   <h4>{t('noOrders')}</h4>
                   <p className="text-muted">{t('noOrdersMessage')}</p>
                   <a href="/products" className="btn btn-primary">
@@ -247,7 +240,7 @@ const Orders = () => {
               </div>
             )}
           </div>
-          
+
           {/* Order Details - Right Side */}
           <div className="col-lg-4 mt-4 mt-lg-0">
             {selectedOrderId && (
@@ -263,36 +256,36 @@ const Orders = () => {
                       <div className="mb-3">
                         <strong>{t('orderDate')}:</strong> {formatDate(orderDetails.created_at)}
                       </div>
-                      
+
                       <div className="mb-3">
-                        <strong>{t('status')}:</strong> 
-                        <span 
+                        <strong>{t('status')}:</strong>
+                        <span
                           className={`badge ms-2 ${getStatusBadgeClass(orderDetails.status)}`}
                         >
                           {orderDetails.status}
                         </span>
                       </div>
-                      
+
                       <div className="mb-3">
                         <strong>{t('shippingAddress')}:</strong>
                         <div className="mt-1">
-                          {orderDetails.shipping_address?.address},<br/>
-                          {orderDetails.shipping_address?.city},<br/>
+                          {orderDetails.shipping_address?.address},<br />
+                          {orderDetails.shipping_address?.city},<br />
                           {orderDetails.shipping_address?.postal_code}
                         </div>
                       </div>
-                      
+
                       <hr />
-                      
+
                       <h6 className="mb-3">{t('orderedItems')}</h6>
                       {orderDetails.items?.map((item) => (
                         <div key={item.id} className="d-flex mb-2">
                           <div className="flex-shrink-0">
-                            <img 
-                              src={item.image || '/assets/images/product_1.png'} 
-                              alt={item.name} 
-                              width="40" 
-                              height="40" 
+                            <img
+                              src={item.image || '/assets/images/product_1.png'}
+                              alt={item.name}
+                              width="40"
+                              height="40"
                               className="rounded"
                             />
                           </div>
@@ -302,19 +295,19 @@ const Orders = () => {
                               <span className="text-muted small">{t('quantity')}: {item.quantity}</span>
                               <span className="small fw-bold">
                                 {(item.price * item.quantity).toFixed(2)}
-                                <img 
-                                  src="/assets/images/sar.svg" 
-                                  alt="SAR" 
-                                  className="price-symbol-img" 
+                                <img
+                                  src="/assets/images/sar.svg"
+                                  alt="SAR"
+                                  className="price-symbol-img"
                                 />
                               </span>
                             </div>
                           </div>
                         </div>
                       ))}
-                      
+
                       <hr />
-                      
+
                       <div className="d-flex justify-content-between mb-2">
                         <span>{t('subtotal')}</span>
                         <span>
@@ -322,7 +315,7 @@ const Orders = () => {
                           <img src="/assets/images/sar.svg" alt="SAR" className="price-symbol-img" />
                         </span>
                       </div>
-                      
+
                       <div className="d-flex justify-content-between mb-2">
                         <span>{t('shipping')}</span>
                         <span>
@@ -330,7 +323,7 @@ const Orders = () => {
                           <img src="/assets/images/sar.svg" alt="SAR" className="price-symbol-img" />
                         </span>
                       </div>
-                      
+
                       <div className="d-flex justify-content-between mb-2">
                         <span>{t('tax')}</span>
                         <span>
@@ -338,7 +331,7 @@ const Orders = () => {
                           <img src="/assets/images/sar.svg" alt="SAR" className="price-symbol-img" />
                         </span>
                       </div>
-                      
+
                       {orderDetails.discount > 0 && (
                         <div className="d-flex justify-content-between mb-2 text-success">
                           <span>{t('discount')}</span>
@@ -348,9 +341,9 @@ const Orders = () => {
                           </span>
                         </div>
                       )}
-                      
+
                       <hr />
-                      
+
                       <div className="d-flex justify-content-between">
                         <span className="fw-bold">{t('total')}</span>
                         <span className="fw-bold">
@@ -363,12 +356,12 @@ const Orders = () => {
                 ) : (
                   <div className="card border-0 shadow-sm mb-4">
                     <div className="card-body text-center py-4">
-                      <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+                      <SpinnerIcon />
                       <p className="mt-3">{t('loadingOrderDetails')}</p>
                     </div>
                   </div>
                 )}
-                
+
                 {/* Tracking Information */}
                 {trackingInfo && (
                   <div className="card border-0 shadow-sm">
@@ -384,7 +377,7 @@ const Orders = () => {
                       <div className="mb-3">
                         <strong>{t('trackingNumber')}:</strong> {trackingInfo.tracking_number}
                       </div>
-                      
+
                       <div className="tracking-timeline">
                         {trackingInfo.events?.map((event, index) => (
                           <div key={index} className="tracking-item">
@@ -399,7 +392,7 @@ const Orders = () => {
                           </div>
                         ))}
                       </div>
-                      
+
                       {trackingInfo.estimated_delivery && (
                         <div className="mt-3 alert alert-info">
                           <strong>{t('estimatedDelivery')}:</strong> {formatDate(trackingInfo.estimated_delivery)}

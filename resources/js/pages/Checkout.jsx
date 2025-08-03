@@ -3,16 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import Breadcrumb from '../components/Breadcrumb/Breadcrumb';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faSpinner, 
-  faCheckCircle, 
-  faExclamationTriangle,
-  faCreditCard,
-  faShield,
-  faWifi,
-  faLock
-} from '@fortawesome/free-solid-svg-icons';
+// Simple icon components to replace FontAwesome
+const SpinnerIcon = () => <div className="spinner-border spinner-border-sm" role="status"><span className="visually-hidden">Loading...</span></div>;
+const CheckIcon = () => <span>✅</span>;
+const WarningIcon = () => <span>⚠️</span>;
+const CreditCardIcon = () => <span>💳</span>;
+const ShieldIcon = () => <span>🛡️</span>;
+const WifiIcon = () => <span>📶</span>;
+const LockIcon = () => <span>🔒</span>;
 import CheckoutService from '../services/CheckoutService';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar/Navbar';
@@ -23,17 +21,17 @@ const Checkout = () => {
   const { cart, cartSummary, loading: cartLoading, error: cartError, clearCart } = useCart();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  
+
   // Check authentication status
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
     }
   }, [isAuthenticated, navigate]);
-  
+
   // Extract cart items from the cart object
   const cartItems = cart?.items || [];
-  
+
   // Breadcrumb items
   const breadcrumbItems = [
     { label: t('home'), url: '/' },
@@ -69,7 +67,7 @@ const Checkout = () => {
       ...formData,
       [name]: value
     });
-    
+
     // Clear error when user starts typing
     if (formErrors[name]) {
       setFormErrors({
@@ -82,7 +80,7 @@ const Checkout = () => {
   // Validate form
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Required fields
     const requiredFields = ['firstName', 'lastName', 'email', 'phone', 'address', 'city'];
     requiredFields.forEach(field => {
@@ -90,17 +88,17 @@ const Checkout = () => {
         newErrors[field] = t('fieldRequired');
       }
     });
-    
+
     // Email validation
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = t('invalidEmail');
     }
-    
+
     // Phone validation
     if (formData.phone && !/^\+?[\d\s-]{8,}$/.test(formData.phone)) {
       newErrors.phone = t('invalidPhone');
     }
-    
+
     // Credit card validations if paying by card
     if (formData.paymentMethod === 'credit_card') {
       if (!formData.cardNumber?.trim()) {
@@ -108,24 +106,24 @@ const Checkout = () => {
       } else if (!/^\d{16}$/.test(formData.cardNumber.replace(/\s/g, ''))) {
         newErrors.cardNumber = t('invalidCardNumber');
       }
-      
+
       if (!formData.cardName?.trim()) {
         newErrors.cardName = t('fieldRequired');
       }
-      
+
       if (!formData.expiryDate?.trim()) {
         newErrors.expiryDate = t('fieldRequired');
       } else if (!/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
         newErrors.expiryDate = t('invalidExpiryDate');
       }
-      
+
       if (!formData.cvv?.trim()) {
         newErrors.cvv = t('fieldRequired');
       } else if (!/^\d{3,4}$/.test(formData.cvv)) {
         newErrors.cvv = t('invalidCvv');
       }
     }
-    
+
     setFormErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -133,14 +131,14 @@ const Checkout = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setOrderSubmitting(true);
     setOrderError(null);
-    
+
     try {
       // Step 1: Save address
       const addressPayload = {
@@ -159,9 +157,9 @@ const Checkout = () => {
           use_for_shipping: true
         }
       };
-      
+
       await CheckoutService.saveAddress(addressPayload);
-      
+
       // Step 2: Check minimum order
       const minimumOrderCheck = await CheckoutService.checkMinimumOrder();
       if (!minimumOrderCheck.success) {
@@ -169,37 +167,37 @@ const Checkout = () => {
         setOrderSubmitting(false);
         return;
       }
-      
+
       // Step 3: Save payment method
       const paymentPayload = {
         payment: {
           method: formData.paymentMethod
         }
       };
-      
+
       if (formData.paymentMethod === 'credit_card') {
         paymentPayload.payment.card_number = formData.cardNumber.replace(/\s/g, '');
         paymentPayload.payment.card_holder_name = formData.cardName;
         paymentPayload.payment.expiry_date = formData.expiryDate;
         paymentPayload.payment.cvv = formData.cvv;
       }
-      
+
       await CheckoutService.savePayment(paymentPayload);
-      
+
       // Step 4: Submit the order
       const response = await CheckoutService.submitOrder();
-      
+
       // If we get here, the order was successful
       setOrderSuccess(true);
-      
+
       // Clear the cart after successful order
       await clearCart();
-      
+
       // Redirect to orders page after short delay
       setTimeout(() => {
         window.location.href = '/orders';
       }, 3000);
-      
+
     } catch (err) {
       if (!navigator.onLine) {
         setOrderError(t('networkError'));
@@ -224,7 +222,7 @@ const Checkout = () => {
             <FontAwesomeIcon icon={faLock} size="3x" className="mb-3 text-warning" />
             <h2>{t('authenticationRequired')}</h2>
             <p className="mb-4">{t('pleaseLoginToCheckout')}</p>
-            <button 
+            <button
               className="btn btn-primary"
               onClick={() => navigate('/login')}
             >
@@ -265,27 +263,27 @@ const Checkout = () => {
       <Breadcrumb items={breadcrumbItems} />
       <div className="container py-5">
         <h1 className="mb-4">{t('checkout')}</h1>
-        
+
         {error && (
           <div className="alert alert-danger mb-4">
             {error}
           </div>
         )}
-        
+
         {orderError && (
           <div className="alert alert-danger mb-4">
             <FontAwesomeIcon icon={faExclamationTriangle} className="me-2" />
             {orderError}
           </div>
         )}
-        
+
         <div className="row">
           {/* Checkout Form - Left Side */}
           <div className="col-lg-8 mb-4 mb-lg-0">
             <div className="card border-0 shadow-sm mb-4">
               <div className="card-body p-4">
                 <h3 className="mb-4">{t('shippingInformation')}</h3>
-                
+
                 <form onSubmit={handleSubmit}>
                   <div className="row">
                     <div className="col-md-6 mb-3">
@@ -302,7 +300,7 @@ const Checkout = () => {
                         <div className="invalid-feedback">{formErrors.firstName}</div>
                       )}
                     </div>
-                    
+
                     <div className="col-md-6 mb-3">
                       <label htmlFor="lastName" className="form-label">{t('lastName')} *</label>
                       <input
@@ -318,7 +316,7 @@ const Checkout = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="row">
                     <div className="col-md-6 mb-3">
                       <label htmlFor="email" className="form-label">{t('email')} *</label>
@@ -334,7 +332,7 @@ const Checkout = () => {
                         <div className="invalid-feedback">{formErrors.email}</div>
                       )}
                     </div>
-                    
+
                     <div className="col-md-6 mb-3">
                       <label htmlFor="phone" className="form-label">{t('phone')} *</label>
                       <input
@@ -350,7 +348,7 @@ const Checkout = () => {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="mb-3">
                     <label htmlFor="address" className="form-label">{t('address')} *</label>
                     <input
@@ -365,7 +363,7 @@ const Checkout = () => {
                       <div className="invalid-feedback">{formErrors.address}</div>
                     )}
                   </div>
-                  
+
                   <div className="row">
                     <div className="col-md-6 mb-3">
                       <label htmlFor="city" className="form-label">{t('city')} *</label>
@@ -381,7 +379,7 @@ const Checkout = () => {
                         <div className="invalid-feedback">{formErrors.city}</div>
                       )}
                     </div>
-                    
+
                     <div className="col-md-6 mb-3">
                       <label htmlFor="postalCode" className="form-label">{t('postalCode')}</label>
                       <input
@@ -394,9 +392,9 @@ const Checkout = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <h3 className="mb-3 mt-4">{t('paymentMethod')}</h3>
-                  
+
                   <div className="mb-4">
                     <div className="form-check mb-2">
                       <input
@@ -413,7 +411,7 @@ const Checkout = () => {
                         {t('creditCard')}
                       </label>
                     </div>
-                    
+
                     <div className="form-check">
                       <input
                         className="form-check-input"
@@ -429,7 +427,7 @@ const Checkout = () => {
                       </label>
                     </div>
                   </div>
-                  
+
                   {formData.paymentMethod === 'credit_card' && (
                     <div className="card mb-4">
                       <div className="card-body">
@@ -448,7 +446,7 @@ const Checkout = () => {
                             <div className="invalid-feedback">{formErrors.cardNumber}</div>
                           )}
                         </div>
-                        
+
                         <div className="mb-3">
                           <label htmlFor="cardName" className="form-label">{t('nameOnCard')} *</label>
                           <input
@@ -463,7 +461,7 @@ const Checkout = () => {
                             <div className="invalid-feedback">{formErrors.cardName}</div>
                           )}
                         </div>
-                        
+
                         <div className="row">
                           <div className="col-md-6 mb-3">
                             <label htmlFor="expiryDate" className="form-label">{t('expiryDate')} *</label>
@@ -480,7 +478,7 @@ const Checkout = () => {
                               <div className="invalid-feedback">{formErrors.expiryDate}</div>
                             )}
                           </div>
-                          
+
                           <div className="col-md-6 mb-3">
                             <label htmlFor="cvv" className="form-label">CVV *</label>
                             <input
@@ -497,7 +495,7 @@ const Checkout = () => {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="d-flex align-items-center mt-2">
                           <FontAwesomeIcon icon={faShield} className="text-success me-2" />
                           <small className="text-muted">{t('securePaymentMessage')}</small>
@@ -505,10 +503,10 @@ const Checkout = () => {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="d-grid">
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="btn btn-primary btn-lg py-3"
                       disabled={orderSubmitting || loading || !cartItems.length}
                     >
@@ -526,13 +524,13 @@ const Checkout = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Order Summary - Right Side */}
           <div className="col-lg-4">
             <div className="card border-0 shadow-sm">
               <div className="card-body">
                 <h3 className="mb-4">{t('orderSummary')}</h3>
-                
+
                 {loading ? (
                   <div className="text-center py-4">
                     <FontAwesomeIcon icon={faSpinner} spin size="2x" />
@@ -546,9 +544,9 @@ const Checkout = () => {
                             <div key={item.id} className="d-flex mb-3">
                               <div className="flex-shrink-0">
                                 <div className="product-thumbnail">
-                                  <img 
-                                    src={item.image || '/assets/images/product_1.png'} 
-                                    alt={item.name} 
+                                  <img
+                                    src={item.image || '/assets/images/product_1.png'}
+                                    alt={item.name}
                                     width="50"
                                     height="50"
                                     className="rounded"
@@ -563,10 +561,10 @@ const Checkout = () => {
                                   </small>
                                   <span className="fw-bold">
                                     {(item.price * item.quantity).toFixed(2)}
-                                    <img 
-                                      src="/assets/images/sar.svg" 
-                                      className="price-symbol-img" 
-                                      alt="SAR" 
+                                    <img
+                                      src="/assets/images/sar.svg"
+                                      className="price-symbol-img"
+                                      alt="SAR"
                                     />
                                   </span>
                                 </div>
@@ -574,55 +572,55 @@ const Checkout = () => {
                             </div>
                           ))}
                         </div>
-                        
+
                         <hr />
-                        
+
                         <div className="d-flex justify-content-between mb-2">
                           <span>{t('subtotal')}</span>
                           <span>
                             {cartSummary.subtotal?.toFixed(2) || '0.00'}
-                            <img 
-                              src="/assets/images/sar.svg" 
-                              className="price-symbol-img" 
-                              alt="SAR" 
+                            <img
+                              src="/assets/images/sar.svg"
+                              className="price-symbol-img"
+                              alt="SAR"
                             />
                           </span>
                         </div>
-                        
+
                         <div className="d-flex justify-content-between mb-2">
                           <span>{t('shipping')}</span>
                           <span>
                             {cartSummary.shipping?.toFixed(2) || '0.00'}
-                            <img 
-                              src="/assets/images/sar.svg" 
-                              className="price-symbol-img" 
-                              alt="SAR" 
+                            <img
+                              src="/assets/images/sar.svg"
+                              className="price-symbol-img"
+                              alt="SAR"
                             />
                           </span>
                         </div>
-                        
+
                         <div className="d-flex justify-content-between mb-2">
                           <span>{t('tax')}</span>
                           <span>
                             {cartSummary.tax?.toFixed(2) || '0.00'}
-                            <img 
-                              src="/assets/images/sar.svg" 
-                              className="price-symbol-img" 
-                              alt="SAR" 
+                            <img
+                              src="/assets/images/sar.svg"
+                              className="price-symbol-img"
+                              alt="SAR"
                             />
                           </span>
                         </div>
-                        
+
                         <hr />
-                        
+
                         <div className="d-flex justify-content-between mb-0">
                           <span className="fw-bold">{t('total')}</span>
                           <span className="total-price fw-bold">
                             {cartSummary.total?.toFixed(2) || '0.00'}
-                            <img 
-                              src="/assets/images/sar.svg" 
-                              className="price-symbol-img" 
-                              alt="SAR" 
+                            <img
+                              src="/assets/images/sar.svg"
+                              className="price-symbol-img"
+                              alt="SAR"
                             />
                           </span>
                         </div>

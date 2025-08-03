@@ -14,7 +14,7 @@ const AuthModal = ({ show, onHide, initialTab = 'login', returnUrl = null }) => 
   const [activeTab, setActiveTab] = useState(initialTab);
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Get return URL from props or location state
   const redirectTo = returnUrl || location.state?.from?.pathname;
 
@@ -26,14 +26,14 @@ const AuthModal = ({ show, onHide, initialTab = 'login', returnUrl = null }) => 
       resetState(); // Reset auth context state when modal is closed
     }
   }, [show, initialTab, resetState]);
-  
+
   // Handle successful authentication
   useEffect(() => {
     // If user becomes authenticated and modal is shown, close it and redirect if needed
     if (isAuthenticated && show) {
       // First close the modal
       onHide();
-      
+
       // Then redirect if we have a URL to go back to
       if (redirectTo) {
         navigate(redirectTo, { replace: true });
@@ -41,36 +41,45 @@ const AuthModal = ({ show, onHide, initialTab = 'login', returnUrl = null }) => 
     }
   }, [isAuthenticated, show, onHide, redirectTo, navigate]);
 
+  // Handle modal close - prevent closing during OTP step unless explicitly allowed
+  const handleModalHide = () => {
+    if (!otpSent) {
+      onHide();
+    }
+  };
+
   return (
     <>
       {/* Main Auth Modal */}
-      <Modal 
-        show={show} 
-        onHide={onHide} 
-        centered 
+      <Modal
+        show={show}
+        onHide={handleModalHide}
+        centered
         size="lg"
         className={`auth-modal ${isRTL ? 'rtl' : 'ltr'}`}
+        backdrop={otpSent ? 'static' : true}
+        keyboard={!otpSent}
       >
         <Modal.Body className="p-4">
           <div className="auth-tabs-container">
             <div className="auth-tabs">
-              <Nav 
-                variant="pills" 
+              <Nav
+                variant="pills"
                 className="auth-nav"
                 activeKey={activeTab}
                 onSelect={(k) => setActiveTab(k)}
               >
                 <Nav.Item>
-                  <Nav.Link 
-                    eventKey="login" 
+                  <Nav.Link
+                    eventKey="login"
                     className={activeTab === 'login' ? 'active-tab' : 'inactive-tab'}
                   >
                     {t('login')}
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link 
-                    eventKey="register" 
+                  <Nav.Link
+                    eventKey="register"
                     className={activeTab === 'register' ? 'active-tab' : 'inactive-tab'}
                   >
                     {t('register')}

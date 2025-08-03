@@ -1,19 +1,18 @@
-/* Import Google Font */
-@import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap');
+/* Use CSS variables from index.css instead of importing font again */
 
 /* --- Typography Styles --- */
 
 .title {
-    font-family: 'El Messiri', sans-serif;
+    font-family: var(--font-family-primary, 'El Messiri', sans-serif);
     color: #224921;
-    font-size: 36px;
+    font-size: 2.25rem;
     font-weight: 600;
     line-height: 1.35;
 }
 
 .paragraph {
-    font-family: 'El Messiri', sans-serif;
-    font-size: 24px;
+    font-family: var(--font-family-primary, 'El Messiri', sans-serif);
+    font-size: 1.5rem;
     line-height: 1.6;
 }
 
@@ -43,7 +42,7 @@
 
 .infoTagText {
     color: #3D853C;
-    font-size: 16px;
-    font-family: 'El Messiri', sans-serif;
+    font-size: 1rem;
+    font-family: var(--font-family-primary, 'El Messiri', sans-serif);
     font-weight: 500;
 }

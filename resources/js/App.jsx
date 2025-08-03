@@ -1,23 +1,27 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'; // Import Bootstrap JS
+
 import './App.css';
 import './i18n/config';
+
+// Import pages
 import Home from './pages/Home';
 import AllProducts from './pages/AllProducts';
 import Landscape from './pages/Landscape';
-import About from './pages/About.jsx';
+import About from './pages/About';
 import Contact from './pages/Contact';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 import ProductDetails from './pages/ProductDetails';
-import EventsPage from './pages/EventsPage.jsx';
-import AuthRoute from './components/Auth/AuthRoute';
+import EventsPage from './pages/EventsPage';
 
-// Import all context providers
+// Import components
+import ProtectedRoute from './components/ProtectedRoute.jsx';
+
+// Import context providers
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
 import { WishlistProvider } from './contexts/WishlistContext.jsx';
@@ -58,29 +62,29 @@ function App() {
 
                     {/* Protected Routes */}
                     <Route path="/cart" element={
-                      <AuthRoute>
+                      <ProtectedRoute>
                         <Cart />
-                      </AuthRoute>
+                      </ProtectedRoute>
                     } />
                     <Route path="/checkout" element={
-                      <AuthRoute>
+                      <ProtectedRoute>
                         <Checkout />
-                      </AuthRoute>
+                      </ProtectedRoute>
                     } />
                     <Route path="/orders" element={
-                      <AuthRoute>
+                      <ProtectedRoute>
                         <Orders />
-                      </AuthRoute>
+                      </ProtectedRoute>
                     } />
                     <Route path="/profile" element={
-                      <AuthRoute>
+                      <ProtectedRoute>
                         <Profile />
-                      </AuthRoute>
+                      </ProtectedRoute>
                     } />
                     <Route path="/wishlist" element={
-                      <AuthRoute>
+                      <ProtectedRoute>
                         <Orders />
-                      </AuthRoute>
+                      </ProtectedRoute>
                     } />
                   </Routes>
 

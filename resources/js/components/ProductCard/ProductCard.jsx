@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useCart } from '../../contexts/CartContext';
-import { isAuthenticated } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import AuthModal from '../Auth/AuthModal';
 import './ProductCard.css';
 
@@ -19,11 +19,12 @@ const ProductCard = ({
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { addToCart, loading: cartLoading } = useCart();
+  const { isAuthenticated } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   const isRTL = i18n.language === 'ar';
-  const authenticated = isAuthenticated();
+  const authenticated = isAuthenticated;
 
   // Extract product data with fallbacks
   const {

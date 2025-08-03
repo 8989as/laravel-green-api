@@ -7,16 +7,15 @@ import './Auth.css';
 const LoginForm = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
-  const { login, verifyOTP, error, resetState } = useAuth();
+  const { sendOtp, login, error, resetState, loading } = useAuth();
 
   const [formData, setFormData] = useState({
-    name: '',
-    phone: ''
+    phone_number: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState('login'); // 'login' | 'otp'
-  const [otp, setOtp] = useState(['', '', '', '']);
-  const inputRefs = [useRef(), useRef(), useRef(), useRef()];
+  const [step, setStep] = useState('phone'); // 'phone' | 'otp'
+  const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6 digits for OTP
+  const inputRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
   useEffect(() => {
     if (step === 'otp' && inputRefs[0].current) {
@@ -40,7 +39,7 @@ const LoginForm = () => {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-    if (value && index < 3) {
+    if (value && index < 5) {
       inputRefs[index + 1].current.focus();
     }
   };
@@ -52,16 +51,42 @@ const LoginForm = () => {
     }
   };
 
-  // Handle phone submit
+  // Handle phone submit (send OTP)
   const handlePhoneSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.phone) return;
+    if (!formData.phone_number) return;
     setIsSubmitting(true);
     try {
-      localStorage.setItem('temp_phone', formData.phone);
-      const result = await login(formData.phone);
-      if (result) {
+      const result = await sendOtp(formData.phone_number);
+      if (result.success) {
+        localStorage.setItem('temp_phone', formData.phone_number);
         setStep('otp');
+      }
+    } catch (error) {
+      console.error('Send OTP error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle OTP submit (login)
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    const otpValue = otp.join('');
+    if (otpValue.length !== 6) return;
+    setIsSubmitting(true);
+    try {
+      const phone = localStorage.getItem('temp_phone') || formData.phone_number;
+      const result = await login({
+        phone_number: phone,
+        otp: otpValue
+      });
+      if (result.success) {
+        setStep('phone');
+        setOtp(['', '', '', '', '', '']);
+        setFormData({ phone_number: '' });
+        localStorage.removeItem('temp_phone');
+        resetState();
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -70,66 +95,48 @@ const LoginForm = () => {
     }
   };
 
-  // Handle OTP submit
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault();
-    const otpValue = otp.join('');
-    if (otpValue.length !== 4) return;
-    setIsSubmitting(true);
-    try {
-      const phone = localStorage.getItem('temp_phone') || formData.phone;
-      const result = await verifyOTP(phone, otpValue);
-      if (result) {
-        setStep('login');
-        setOtp(['', '', '', '']);
-        resetState();
-      } // else, error is shown from context
-    } catch (error) {
-      // error handled by context
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   // Allow user to go back to phone entry
   const handleBack = () => {
-    setStep('login');
-    setOtp(['', '', '', '']);
+    setStep('phone');
+    setOtp(['', '', '', '', '', '']);
     resetState();
   };
 
   return (
-    <Form className={`auth-form ${isRTL ? 'text-end' : 'text-start'}`} onSubmit={step === 'login' ? handlePhoneSubmit : handleOtpSubmit}>
+    <Form className={`auth-form ${isRTL ? 'text-end' : 'text-start'}`} onSubmit={step === 'phone' ? handlePhoneSubmit : handleOtpSubmit}>
       {error && <div className="alert alert-danger">{error}</div>}
-      {step === 'login' && (
+      {step === 'phone' && (
         <>
           <Form.Group className="mb-4">
             <Form.Label>{t('phoneNumber')}</Form.Label>
             <Form.Control
               type="tel"
-              name="phone"
-              value={formData.phone}
+              name="phone_number"
+              value={formData.phone_number}
               onChange={handleChange}
               placeholder={t('enterYourPhone')}
               className="auth-input"
               required
             />
           </Form.Group>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="auth-submit-button w-100"
-            disabled={!formData.phone || isSubmitting}
+            disabled={!formData.phone_number || isSubmitting || loading}
           >
-            {isSubmitting ? (
+            {(isSubmitting || loading) ? (
               <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
             ) : null}
-            {t('login')}
+            {t('sendOTP')}
           </Button>
         </>
       )}
       {step === 'otp' && (
         <>
           <h2 className="otp-title text-center mb-4">{t('verificationCode')}</h2>
+          <p className="text-center mb-4 text-muted">
+            {t('otpSentTo')} {localStorage.getItem('temp_phone')}
+          </p>
           <div className="otp-inputs mb-3 d-flex justify-content-center">
             {otp.map((digit, index) => (
               <input
@@ -147,23 +154,23 @@ const LoginForm = () => {
             ))}
           </div>
           <div className="d-flex justify-content-between">
-            <Button 
+            <Button
               variant="secondary"
               className="otp-cancel-button"
               onClick={handleBack}
-              disabled={isSubmitting}
+              disabled={isSubmitting || loading}
             >
-              {t('cancel')}
+              {t('back')}
             </Button>
-            <Button 
+            <Button
               type="submit"
               className="otp-button"
-              disabled={otp.join('').length !== 4 || isSubmitting}
+              disabled={otp.join('').length !== 6 || isSubmitting || loading}
             >
-              {isSubmitting ? (
+              {(isSubmitting || loading) ? (
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               ) : null}
-              {t('confirm')}
+              {t('login')}
             </Button>
           </div>
         </>
