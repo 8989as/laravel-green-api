@@ -46,7 +46,8 @@ const AuthModal = ({ show, onHide, initialTab = 'login', returnUrl = null }) => 
 
   // Handle modal close - prevent closing during OTP step unless explicitly allowed
   const handleModalHide = () => {
-    if (!otpSent) {
+    // Allow closing if OTP hasn't been sent yet, or if user is already authenticated
+    if (!otpSent || isAuthenticated) {
       onHide();
     }
   };

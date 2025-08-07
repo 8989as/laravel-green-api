@@ -1,7 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext.jsx';
+import OTPInput from './OTPInput';
+import PhoneInput from './PhoneInput';
+import ResendOTP from './ResendOTP';
 import './Auth.css';
 
 const LoginForm = () => {
@@ -9,57 +12,59 @@ const LoginForm = () => {
   const isRTL = i18n.language === 'ar';
   const { sendOtp, login, error, resetState, loading } = useAuth();
 
+  // Form state
   const [formData, setFormData] = useState({
     phone_number: ''
   });
+
+  // Step management: 'phone' -> 'otp'
+  const [step, setStep] = useState('phone');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState('phone'); // 'phone' | 'otp'
-  const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6 digits for OTP
-  const inputRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
+
+
+  // Reset form when component unmounts
   useEffect(() => {
-    if (step === 'otp' && inputRefs[0].current) {
-      inputRefs[0].current.focus();
-    }
-  }, [step]);
+    return () => {
+      resetForm();
+    };
+  }, []);
 
-  // Handle input change
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
 
-  // Handle OTP input change
-  const handleOtpChange = (e, index) => {
-    const value = e.target.value;
-    if (value.length > 1) return;
-    const newOtp = [...otp];
-    newOtp[index] = value;
+  // Handle OTP input changes
+  const handleOtpChange = (newOtp) => {
     setOtp(newOtp);
-    if (value && index < 5) {
-      inputRefs[index + 1].current.focus();
-    }
   };
 
-  // Handle OTP key down
-  const handleOtpKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs[index - 1].current.focus();
-    }
+  // Reset form to initial state
+  const resetForm = () => {
+    setStep('phone');
+    setFormData({ phone_number: '' });
+    setOtp(['', '', '', '', '', '']);
+    setIsSubmitting(false);
+    resetState();
   };
 
-  // Handle phone submit (send OTP)
-  const handlePhoneSubmit = async (e) => {
+  // Handle phone number submission (send OTP)
+  const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!formData.phone_number) return;
+
+    if (!formData.phone_number.trim()) return;
+
     setIsSubmitting(true);
+
     try {
-      const result = await sendOtp(formData.phone_number);
+      const result = await sendOtp(formData.phone_number.trim());
       if (result.success) {
-        localStorage.setItem('temp_phone', formData.phone_number);
         setStep('otp');
       }
     } catch (error) {
@@ -69,24 +74,23 @@ const LoginForm = () => {
     }
   };
 
-  // Handle OTP submit (login)
-  const handleOtpSubmit = async (e) => {
+  // Handle login with OTP
+  const handleLogin = async (e) => {
     e.preventDefault();
+
     const otpValue = otp.join('');
     if (otpValue.length !== 6) return;
+
     setIsSubmitting(true);
+
     try {
-      const phone = localStorage.getItem('temp_phone') || formData.phone_number;
       const result = await login({
-        phone_number: phone,
+        phone_number: formData.phone_number.trim(),
         otp: otpValue
       });
+
       if (result.success) {
-        setStep('phone');
-        setOtp(['', '', '', '', '', '']);
-        setFormData({ phone_number: '' });
-        localStorage.removeItem('temp_phone');
-        resetState();
+        resetForm();
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -95,87 +99,99 @@ const LoginForm = () => {
     }
   };
 
-  // Allow user to go back to phone entry
+  // Go back to phone step
   const handleBack = () => {
     setStep('phone');
     setOtp(['', '', '', '', '', '']);
     resetState();
   };
 
+  // Validate phone number format (basic validation)
+  const isValidPhone = (phone) => {
+    return phone && phone.length >= 10 && /^\+?[0-9]+$/.test(phone);
+  };
+
+  // Check if OTP is complete
+  const isOtpComplete = otp.join('').length === 6;
+
   return (
-    <Form className={`auth-form ${isRTL ? 'text-end' : 'text-start'}`} onSubmit={step === 'phone' ? handlePhoneSubmit : handleOtpSubmit}>
-      {error && <div className="alert alert-danger">{error}</div>}
+    <div className={`auth-form ${isRTL ? 'text-end' : 'text-start'}`}>
+      {error && (
+        <Alert variant="danger" className="mb-3">
+          {typeof error === 'string' ? error : error.message || 'An error occurred'}
+        </Alert>
+      )}
+
       {step === 'phone' && (
-        <>
+        <Form onSubmit={handleSendOtp}>
           <Form.Group className="mb-4">
             <Form.Label>{t('phoneNumber')}</Form.Label>
-            <Form.Control
-              type="tel"
-              name="phone_number"
+            <PhoneInput
               value={formData.phone_number}
-              onChange={handleChange}
+              onChange={(value) => setFormData(prev => ({ ...prev, phone_number: value }))}
               placeholder={t('enterYourPhone')}
-              className="auth-input"
-              required
+              autoFocus={true}
+              disabled={isSubmitting || loading}
             />
           </Form.Group>
+
           <Button
             type="submit"
             className="auth-submit-button w-100"
-            disabled={!formData.phone_number || isSubmitting || loading}
+            disabled={!isValidPhone(formData.phone_number) || isSubmitting || loading}
           >
-            {(isSubmitting || loading) ? (
+            {(isSubmitting || loading) && (
               <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            ) : null}
+            )}
             {t('sendOTP')}
           </Button>
-        </>
+        </Form>
       )}
+
       {step === 'otp' && (
-        <>
-          <h2 className="otp-title text-center mb-4">{t('verificationCode')}</h2>
-          <p className="text-center mb-4 text-muted">
-            {t('otpSentTo')} {localStorage.getItem('temp_phone')}
-          </p>
-          <div className="otp-inputs mb-3 d-flex justify-content-center">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={inputRefs[index]}
-                type="text"
-                maxLength="1"
-                value={digit}
-                onChange={(e) => handleOtpChange(e, index)}
-                onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                className="otp-input"
-                pattern="[0-9]*"
-                inputMode="numeric"
-              />
-            ))}
+        <Form onSubmit={handleLogin}>
+          <div className="mb-4">
+            <h5 className="text-center mb-3">{t('verificationCode')}</h5>
+            <p className="text-center mb-3 text-muted small">
+              {t('otpSentTo')} {formData.phone_number}
+            </p>
+
+            <OTPInput
+              value={otp}
+              onChange={handleOtpChange}
+              autoFocus={true}
+              disabled={isSubmitting || loading}
+            />
+
+            <ResendOTP
+              onResend={() => sendOtp(formData.phone_number.trim())}
+              disabled={isSubmitting || loading}
+            />
           </div>
+
           <div className="d-flex justify-content-between">
             <Button
-              variant="secondary"
-              className="otp-cancel-button"
+              variant="outline-secondary"
               onClick={handleBack}
               disabled={isSubmitting || loading}
             >
               {t('back')}
             </Button>
+
             <Button
               type="submit"
-              className="otp-button"
-              disabled={otp.join('').length !== 6 || isSubmitting || loading}
+              className="auth-submit-button"
+              disabled={!isOtpComplete || isSubmitting || loading}
             >
-              {(isSubmitting || loading) ? (
+              {(isSubmitting || loading) && (
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              ) : null}
+              )}
               {t('login')}
             </Button>
           </div>
-        </>
+        </Form>
       )}
-    </Form>
+    </div>
   );
 };
 

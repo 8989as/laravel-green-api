@@ -22,6 +22,11 @@ Route::group([], function () {
     // Route::post('/send-otp', [AuthController::class, 'sendOTP']);
     // Route::post('/verify-otp', [AuthController::class, 'verifyOTP']);
 
+    // Debug routes (remove in production)
+    if (app()->environment(['local', 'development'])) {
+        require __DIR__.'/debug.php';
+    }
+
     // Shop routes
     Route::get('/products', [ShopController::class, 'allPlants']);
     Route::get('/products/category/{id}', [ShopController::class, 'category']);

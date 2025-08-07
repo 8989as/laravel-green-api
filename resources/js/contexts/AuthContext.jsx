@@ -32,21 +32,49 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, [token]);
 
+  // Normalize phone number (remove spaces, ensure proper format)
+  const normalizePhoneNumber = (phone) => {
+    if (!phone) return '';
+    // Remove all non-digit characters except +
+    let normalized = phone.replace(/[^\d+]/g, '');
+    // Ensure it starts with + if it doesn't already
+    if (!normalized.startsWith('+')) {
+      normalized = '+' + normalized;
+    }
+    return normalized;
+  };
+
+  // Extract error message from API response
+  const extractErrorMessage = (err, defaultMessage) => {
+    if (err.response?.data?.error) {
+      // Handle validation errors (object format)
+      if (typeof err.response.data.error === 'object') {
+        const firstError = Object.values(err.response.data.error)[0];
+        return Array.isArray(firstError) ? firstError[0] : firstError;
+      }
+      return err.response.data.error;
+    }
+    return err.response?.data?.message || err.message || defaultMessage;
+  };
+
   // Send OTP to phone number
   const sendOtp = async (phoneNumber) => {
     try {
       setError(null);
       setLoading(true);
 
+      const normalizedPhone = normalizePhoneNumber(phoneNumber);
+
       const response = await axios.post('/api/send-otp', {
-        phone_number: phoneNumber
+        phone_number: normalizedPhone
       });
 
       setOtpSent(true);
       return { success: true, message: response.data.message };
     } catch (err) {
-      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to send OTP';
+      const errorMessage = extractErrorMessage(err, 'Failed to send OTP. Please check your phone number and try again.');
       setError(errorMessage);
+      setOtpSent(false);
       return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
@@ -59,9 +87,11 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
 
+      const normalizedPhone = normalizePhoneNumber(userData.phone_number);
+
       const response = await axios.post('/api/register', {
-        name: userData.name,
-        phone_number: userData.phone_number,
+        name: userData.name.trim(),
+        phone_number: normalizedPhone,
         otp: userData.otp
       });
 
@@ -76,7 +106,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user: customer };
     } catch (err) {
-      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Registration failed';
+      const errorMessage = extractErrorMessage(err, 'Registration failed. Please try again.');
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -90,8 +120,10 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       setLoading(true);
 
+      const normalizedPhone = normalizePhoneNumber(userData.phone_number);
+
       const response = await axios.post('/api/login', {
-        phone_number: userData.phone_number,
+        phone_number: normalizedPhone,
         otp: userData.otp
       });
 
@@ -106,7 +138,7 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, user: customer };
     } catch (err) {
-      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Login failed';
+      const errorMessage = extractErrorMessage(err, 'Login failed. Please check your phone number and OTP.');
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

@@ -18,6 +18,26 @@ class AuthController extends Controller
     }
 
     /**
+     * Normalize phone number to ensure consistent format
+     */
+    private function normalizePhoneNumber($phone)
+    {
+        if (! $phone) {
+            return '';
+        }
+
+        // Remove all non-digit characters except +
+        $normalized = preg_replace('/[^\d+]/', '', $phone);
+
+        // Ensure it starts with + if it doesn't already
+        if (! str_starts_with($normalized, '+')) {
+            $normalized = '+'.$normalized;
+        }
+
+        return $normalized;
+    }
+
+    /**
      * Register a new user with OTP verification
      */
     public function register(Request $request)
@@ -27,9 +47,10 @@ class AuthController extends Controller
             'phone_number' => $request->phone_number,
         ]);
 
+        // First validate basic format
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'phone_number' => 'required|string|unique:customers,phone_number',
+            'phone_number' => 'required|string',
             'otp' => 'required|string',
         ]);
 
@@ -42,8 +63,16 @@ class AuthController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        // Normalize phone number for cache lookup
-        $phoneNumber = ltrim($request->phone_number, '+');
+        // Normalize phone number for consistent handling
+        $normalizedPhone = $this->normalizePhoneNumber($request->phone_number);
+
+        // Check if phone number already exists
+        if (Customer::where('phone_number', $normalizedPhone)->exists()) {
+            return response()->json(['error' => 'Phone number already registered. Please login instead.'], 422);
+        }
+
+        // Normalize phone number for cache lookup (without +)
+        $phoneNumber = ltrim($normalizedPhone, '+');
 
         // Verify OTP
         $cachedOtp = Cache::get('otp_'.$phoneNumber);
@@ -70,7 +99,7 @@ class AuthController extends Controller
             // Create new customer
             $customer = Customer::create([
                 'name' => $request->name,
-                'phone_number' => $request->phone_number,
+                'phone_number' => $normalizedPhone,
             ]);
 
             \Log::info('Customer created successfully', [
@@ -102,27 +131,32 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // First validate basic format
         $validator = Validator::make($request->all(), [
-            'phone_number' => 'required|string|exists:customers,phone_number',
+            'phone_number' => 'required|string',
             'otp' => 'required|string',
         ]);
+
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        // Normalize phone number for cache lookup
-        $phoneNumber = ltrim($request->phone_number, '+');
+        // Normalize phone number for consistent checking
+        $normalizedPhone = $this->normalizePhoneNumber($request->phone_number);
+
+        // Check if customer exists with this phone number
+        $customer = Customer::where('phone_number', $normalizedPhone)->first();
+        if (! $customer) {
+            return response()->json(['error' => 'Phone number not registered. Please register first.'], 404);
+        }
+
+        // Normalize phone number for cache lookup (without +)
+        $phoneNumber = ltrim($normalizedPhone, '+');
 
         // Verify OTP
         $cachedOtp = Cache::get('otp_'.$phoneNumber);
         if (! $cachedOtp || $cachedOtp != $request->otp) {
             return response()->json(['error' => 'Invalid or expired OTP'], 401);
-        }
-
-        // Find existing customer
-        $customer = Customer::where('phone_number', $request->phone_number)->first();
-        if (! $customer) {
-            return response()->json(['error' => 'Customer not found'], 404);
         }
 
         $token = $customer->createToken('auth_token')->plainTextToken;
@@ -147,8 +181,11 @@ class AuthController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
-        // Normalize phone number (remove + if present)
-        $phoneNumber = ltrim($request->phone_number, '+');
+        // Normalize phone number for consistent handling
+        $normalizedPhone = $this->normalizePhoneNumber($request->phone_number);
+
+        // For cache key, remove the + sign
+        $phoneNumber = ltrim($normalizedPhone, '+');
 
         $otp = random_int(100000, 999999);
         Cache::put('otp_'.$phoneNumber, $otp, now()->addMinutes(5));
@@ -156,7 +193,7 @@ class AuthController extends Controller
         // Log the OTP for debugging (remove in production)
         \Log::info('OTP generated for '.$phoneNumber.': '.$otp, [
             'original_phone' => $request->phone_number,
-            'normalized_phone' => $phoneNumber,
+            'normalized_phone' => $normalizedPhone,
             'cache_key' => 'otp_'.$phoneNumber,
         ]);
 

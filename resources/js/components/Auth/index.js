@@ -4,3 +4,6 @@ export { default as AuthModal } from './AuthModal';
 export { default as OTPModal } from './OTPModal';
 export { default as LoginForm } from './LoginForm';
 export { default as RegisterForm } from './RegisterForm';
+export { default as OTPInput } from './OTPInput';
+export { default as PhoneInput } from './PhoneInput';
+export { default as ResendOTP } from './ResendOTP';
