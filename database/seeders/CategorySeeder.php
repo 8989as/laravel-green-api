@@ -28,11 +28,11 @@ class CategorySeeder extends Seeder
                 'description_ar' => 'نباتات داخلية وخارجية.',
             ],
             [
-                'category_en' => 'Gifts',
-                'category_ar' => 'الهدايا',
-                'slug' => 'gifts',
-                'description_en' => 'Ready-made gifts and arrangements.',
-                'description_ar' => 'هدايا جاهزة وتنسيقات.',
+                'category_en' => 'Bouquets',
+                'category_ar' => 'باقات الورد',
+                'slug' => 'bouquets',
+                'description_en' => 'Beautiful flower bouquets and arrangements.',
+                'description_ar' => 'باقات ورد جميلة وتنسيقات رائعة.',
             ],
         ]);
     }

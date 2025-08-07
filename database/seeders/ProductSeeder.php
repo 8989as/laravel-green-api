@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Models\Occasion;
 use App\Models\Product;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
@@ -240,15 +241,174 @@ class ProductSeeder extends Seeder
                 'stock' => 25,
                 'category_id' => 2,
             ],
+            // Gift Products
+            [
+                'name_en' => 'Birthday Celebration Bouquet',
+                'name_ar' => 'باقة احتفال عيد الميلاد',
+                'name_latin' => 'Mixed flowers',
+                'description_en' => 'Colorful birthday bouquet with balloons and ribbon.',
+                'description_ar' => 'باقة عيد ميلاد ملونة مع بالونات وشريط.',
+                'price' => 65.99,
+                'stock' => 30,
+                'has_variants' => false,
+                'category_id' => 1,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'Wedding White Roses',
+                'name_ar' => 'ورود بيضاء للزفاف',
+                'name_latin' => 'Rosa alba',
+                'description_en' => 'Elegant white roses perfect for wedding celebrations.',
+                'description_ar' => 'ورود بيضاء أنيقة مثالية لاحتفالات الزفاف.',
+                'price' => 120.99,
+                'stock' => 20,
+                'has_variants' => true,
+                'category_id' => 2,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'Graduation Success Plant',
+                'name_ar' => 'نبات النجاح للتخرج',
+                'name_latin' => 'Ficus benjamina',
+                'description_en' => 'Lucky plant to celebrate graduation achievements.',
+                'description_ar' => 'نبات الحظ للاحتفال بإنجازات التخرج.',
+                'price' => 45.99,
+                'stock' => 25,
+                'has_variants' => false,
+                'category_id' => 3,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'Mother\'s Day Special',
+                'name_ar' => 'باقة خاصة لعيد الأم',
+                'name_latin' => 'Mixed seasonal',
+                'description_en' => 'Beautiful arrangement to honor mothers.',
+                'description_ar' => 'تنسيق جميل لتكريم الأمهات.',
+                'price' => 75.99,
+                'discount_price' => 65.99,
+                'discount_from' => '2024-03-01',
+                'discount_to' => '2024-03-31',
+                'stock' => 40,
+                'has_variants' => false,
+                'category_id' => 1,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'Father\'s Day Succulent Set',
+                'name_ar' => 'مجموعة عصاريات لعيد الأب',
+                'name_latin' => 'Various succulents',
+                'description_en' => 'Low-maintenance succulent collection for dads.',
+                'description_ar' => 'مجموعة عصاريات سهلة العناية للآباء.',
+                'price' => 55.99,
+                'stock' => 35,
+                'has_variants' => false,
+                'category_id' => 2,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'Valentine\'s Love Bouquet',
+                'name_ar' => 'باقة الحب لعيد الحب',
+                'name_latin' => 'Rosa rubra',
+                'description_en' => 'Romantic red roses for Valentine\'s Day.',
+                'description_ar' => 'ورود حمراء رومانسية لعيد الحب.',
+                'price' => 85.99,
+                'stock' => 50,
+                'has_variants' => true,
+                'category_id' => 3,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'New Baby Pink Arrangement',
+                'name_ar' => 'تنسيق وردي للمولود الجديد',
+                'name_latin' => 'Mixed pink flowers',
+                'description_en' => 'Soft pink flowers to welcome a new baby girl.',
+                'description_ar' => 'زهور وردية ناعمة لاستقبال المولودة الجديدة.',
+                'price' => 60.99,
+                'stock' => 30,
+                'has_variants' => false,
+                'category_id' => 1,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'New Baby Blue Arrangement',
+                'name_ar' => 'تنسيق أزرق للمولود الجديد',
+                'name_latin' => 'Mixed blue flowers',
+                'description_en' => 'Gentle blue flowers to welcome a new baby boy.',
+                'description_ar' => 'زهور زرقاء لطيفة لاستقبال المولود الجديد.',
+                'price' => 60.99,
+                'stock' => 30,
+                'has_variants' => false,
+                'category_id' => 2,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'Anniversary Golden Roses',
+                'name_ar' => 'ورود ذهبية للذكرى السنوية',
+                'name_latin' => 'Rosa aurea',
+                'description_en' => 'Golden roses to celebrate love anniversaries.',
+                'description_ar' => 'ورود ذهبية للاحتفال بذكرى الحب السنوية.',
+                'price' => 95.99,
+                'stock' => 25,
+                'has_variants' => false,
+                'category_id' => 3,
+                'is_gift' => true,
+            ],
+            [
+                'name_en' => 'Congratulations Mixed Bouquet',
+                'name_ar' => 'باقة تهنئة متنوعة',
+                'name_latin' => 'Mixed celebration',
+                'description_en' => 'Bright and cheerful bouquet for any celebration.',
+                'description_ar' => 'باقة مشرقة ومبهجة لأي احتفال.',
+                'price' => 52.99,
+                'stock' => 40,
+                'has_variants' => true,
+                'category_id' => 1,
+                'is_gift' => true,
+            ],
         ];
 
         foreach ($products as $productData) {
-            Product::create(array_merge($productData, [
+            $product = Product::create(array_merge($productData, [
                 'is_active' => true,
                 'in_stock' => $productData['stock'] > 0,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]));
+
+            // Associate gift products with occasions
+            if (isset($productData['is_gift']) && $productData['is_gift']) {
+                $this->attachOccasionsToGiftProduct($product, $productData['name_en']);
+            }
+        }
+    }
+
+    /**
+     * Attach appropriate occasions to gift products based on their names
+     */
+    private function attachOccasionsToGiftProduct($product, $productName)
+    {
+        $occasionMappings = [
+            'Birthday' => ['birthday'],
+            'Wedding' => ['wedding'],
+            'Graduation' => ['graduation'],
+            'Mother\'s Day' => ['mothers-day'],
+            'Father\'s Day' => ['fathers-day'],
+            'Valentine\'s' => ['valentines-day'],
+            'New Baby' => ['new-baby'],
+            'Anniversary' => ['anniversary'],
+            'Congratulations' => ['birthday', 'graduation', 'anniversary'], // Multi-occasion gift
+        ];
+
+        foreach ($occasionMappings as $keyword => $occasionSlugs) {
+            if (stripos($productName, $keyword) !== false) {
+                foreach ($occasionSlugs as $slug) {
+                    $occasion = Occasion::where('slug', $slug)->first();
+                    if ($occasion) {
+                        $product->occasions()->attach($occasion->id);
+                    }
+                }
+                break; // Only attach the first matching occasion set
+            }
         }
     }
 }

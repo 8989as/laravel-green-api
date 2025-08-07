@@ -27,6 +27,14 @@ class VonageService
         $this->sandbox = config('services.vonage.sandbox', false);
         $this->sandboxTo = config('services.vonage.sandbox_to');
         $this->sandboxFrom = config('services.vonage.sandbox_from');
+
+        // Log configuration for debugging
+        Log::info('VonageService initialized', [
+            'sandbox' => $this->sandbox,
+            'has_api_key' => ! empty($this->apiKey),
+            'has_api_secret' => ! empty($this->apiSecret),
+            'from' => $this->sandbox ? $this->sandboxFrom : $this->from,
+        ]);
     }
 
     /**
@@ -64,17 +72,35 @@ class VonageService
             'Content-Type' => 'application/json',
         ];
 
-        $response = Http::withHeaders($headers)
-            ->post($endpoint, $payload);
+        try {
+            $response = Http::withHeaders($headers)
+                ->timeout(30)
+                ->post($endpoint, $payload);
 
-        if ($response->successful()) {
-            return true;
+            if ($response->successful()) {
+                Log::info('Vonage WhatsApp OTP sent successfully', [
+                    'to' => $this->sandbox ? $this->sandboxTo : $to,
+                    'status' => $response->status(),
+                ]);
+
+                return true;
+            }
+
+            Log::error('Vonage WhatsApp OTP send failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'to' => $this->sandbox ? $this->sandboxTo : $to,
+                'endpoint' => $endpoint,
+            ]);
+
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Vonage WhatsApp OTP send exception', [
+                'error' => $e->getMessage(),
+                'to' => $this->sandbox ? $this->sandboxTo : $to,
+            ]);
+
+            return false;
         }
-        Log::error('Vonage WhatsApp OTP send failed', [
-            'status' => $response->status(),
-            'body' => $response->body(),
-        ]);
-
-        return false;
     }
 }

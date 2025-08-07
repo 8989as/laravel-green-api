@@ -2,10 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Category;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -18,7 +16,7 @@ class Product extends Model implements HasMedia
         'name_ar', 'name_en', 'name_latin',
         'description_ar', 'description_en',
         'price', 'discount_price', 'discount_from', 'discount_to',
-        'has_variants', 'stock', 'is_active', 'in_stock', 'is_gift', 'category_id'
+        'has_variants', 'stock', 'is_active', 'in_stock', 'is_gift', 'category_id',
     ];
 
     protected $casts = [
@@ -34,7 +32,7 @@ class Product extends Model implements HasMedia
 
     protected $appends = [
         'current_price', 'main_image', 'gallery_images', 'all_images', 'has_discount',
-        'total_images', 'has_main_image', 'has_gallery_images'
+        'total_images', 'has_main_image', 'has_gallery_images',
     ];
 
     public function scopeFilter(Builder $query, array $filters)
@@ -43,27 +41,39 @@ class Product extends Model implements HasMedia
             $categories = is_array($category) ? $category : explode(',', $category);
             $query->whereIn('category_id', $categories);
         })
-        ->when($filters['size'] ?? null, function ($query, $size) {
-            $sizes = is_array($size) ? $size : explode(',', $size);
-            $query->whereHas('sizes', function ($query) use ($sizes) {
-                $query->whereIn('sizes.id', $sizes);
+            ->when($filters['size'] ?? null, function ($query, $size) {
+                $sizes = is_array($size) ? $size : explode(',', $size);
+                $query->whereHas('sizes', function ($query) use ($sizes) {
+                    $query->whereIn('sizes.id', $sizes);
+                });
+            })
+            ->when($filters['color'] ?? null, function ($query, $color) {
+                $colors = is_array($color) ? $color : explode(',', $color);
+                $query->whereHas('colors', function ($query) use ($colors) {
+                    $query->whereIn('colors.id', $colors);
+                });
+            })
+            ->when($filters['price'] ?? null, function ($query, $price) {
+                $priceRange = explode('-', $price);
+                if (count($priceRange) === 2) {
+                    $query->whereBetween('products.price', [
+                        (float) $priceRange[0],
+                        (float) $priceRange[1],
+                    ]);
+                }
+            })
+            ->when($filters['occasion'] ?? null, function ($query, $occasion) {
+                $occasions = is_array($occasion) ? $occasion : explode(',', $occasion);
+                $query->whereHas('occasions', function ($query) use ($occasions) {
+                    $query->whereIn('occasions.id', $occasions);
+                });
+            })
+            ->when($filters['min_price'] ?? null, function ($query, $minPrice) {
+                $query->where('products.price', '>=', (float) $minPrice);
+            })
+            ->when($filters['max_price'] ?? null, function ($query, $maxPrice) {
+                $query->where('products.price', '<=', (float) $maxPrice);
             });
-        })
-        ->when($filters['color'] ?? null, function ($query, $color) {
-            $colors = is_array($color) ? $color : explode(',', $color);
-            $query->whereHas('colors', function ($query) use ($colors) {
-                $query->whereIn('colors.id', $colors);
-            });
-        })
-        ->when($filters['price'] ?? null, function ($query, $price) {
-            $priceRange = explode('-', $price);
-            if (count($priceRange) === 2) {
-                $query->whereBetween('products.price', [
-                    (float) $priceRange[0], 
-                    (float) $priceRange[1]
-                ]);
-            }
-        });
     }
 
     // Accessors for current language
@@ -80,17 +90,18 @@ class Product extends Model implements HasMedia
     // Discount calculation
     public function getCurrentPriceAttribute()
     {
-        if ($this->discount_price && 
+        if ($this->discount_price &&
             $this->discount_from && $this->discount_to &&
             now()->between($this->discount_from, $this->discount_to)) {
             return $this->discount_price;
         }
+
         return $this->price;
     }
 
     public function getHasDiscountAttribute()
     {
-        return $this->discount_price && 
+        return $this->discount_price &&
                $this->discount_from && $this->discount_to &&
                now()->between($this->discount_from, $this->discount_to);
     }
@@ -98,7 +109,7 @@ class Product extends Model implements HasMedia
     public function getMainImageAttribute()
     {
         $mainMedia = $this->getFirstMedia('products');
-        if (!$mainMedia) {
+        if (! $mainMedia) {
             return null;
         }
 
@@ -134,7 +145,7 @@ class Product extends Model implements HasMedia
     public function getAllImagesAttribute()
     {
         $images = [];
-        
+
         // Add main image
         $mainImage = $this->getFirstMedia('products');
         if ($mainImage) {
@@ -147,10 +158,10 @@ class Product extends Model implements HasMedia
                 'name' => $mainImage->name,
                 'size' => $mainImage->size,
                 'mime_type' => $mainImage->mime_type,
-                'type' => 'main'
+                'type' => 'main',
             ];
         }
-        
+
         // Add gallery images
         $galleryImages = $this->getMedia('gallery');
         foreach ($galleryImages as $media) {
@@ -163,10 +174,10 @@ class Product extends Model implements HasMedia
                 'name' => $media->name,
                 'size' => $media->size,
                 'mime_type' => $media->mime_type,
-                'type' => 'gallery'
+                'type' => 'gallery',
             ];
         }
-        
+
         return $images;
     }
 
@@ -211,11 +222,16 @@ class Product extends Model implements HasMedia
         return $this->belongsToMany(Size::class, 'product_attributes', 'product_id', 'size_id');
     }
 
+    public function occasions()
+    {
+        return $this->belongsToMany(Occasion::class, 'product_occasions');
+    }
+
     // Additional media helper methods
     public function getMainImageUrl($conversion = null)
     {
         $media = $this->getFirstMedia('products');
-        if (!$media) {
+        if (! $media) {
             return null;
         }
 
@@ -230,6 +246,7 @@ class Product extends Model implements HasMedia
     public function getMainImageUrlWithFallback($conversion = 'medium', $fallback = null)
     {
         $url = $this->getMainImageUrl($conversion);
+
         return $url ?: $fallback;
     }
 
@@ -265,7 +282,7 @@ class Product extends Model implements HasMedia
         $data = [
             'main_image' => null,
             'gallery_images' => [],
-            'total_images' => 0
+            'total_images' => 0,
         ];
 
         // Main image
@@ -309,45 +326,45 @@ class Product extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('products')
-             ->useDisk('public')
-             ->singleFile() // For main image
-             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
-             
+            ->useDisk('public')
+            ->singleFile() // For main image
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+
         $this->addMediaCollection('gallery')
-             ->useDisk('public')
-             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+            ->useDisk('public')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
     }
 
-    public function registerMediaConversions(Media $media = null): void
+    public function registerMediaConversions(?Media $media = null): void
     {
         // Thumbnail conversion - optimized for product cards and previews
         $this->addMediaConversion('thumb')
-              ->width(300)
-              ->height(300)
-              ->sharpen(10)
-              ->optimize()
-              ->quality(85)
-              ->performOnCollections('products', 'gallery')
-              ->nonQueued();
-              
+            ->width(300)
+            ->height(300)
+            ->sharpen(10)
+            ->optimize()
+            ->quality(85)
+            ->performOnCollections('products', 'gallery')
+            ->nonQueued();
+
         // Medium conversion - for product detail views
         $this->addMediaConversion('medium')
-              ->width(600)
-              ->height(600)
-              ->sharpen(10)
-              ->optimize()
-              ->quality(90)
-              ->performOnCollections('products', 'gallery')
-              ->nonQueued();
+            ->width(600)
+            ->height(600)
+            ->sharpen(10)
+            ->optimize()
+            ->quality(90)
+            ->performOnCollections('products', 'gallery')
+            ->nonQueued();
 
         // Large conversion - for high-quality display
         $this->addMediaConversion('large')
-              ->width(1200)
-              ->height(1200)
-              ->sharpen(5)
-              ->optimize()
-              ->quality(95)
-              ->performOnCollections('products', 'gallery')
-              ->nonQueued();
+            ->width(1200)
+            ->height(1200)
+            ->sharpen(5)
+            ->optimize()
+            ->quality(95)
+            ->performOnCollections('products', 'gallery')
+            ->nonQueued();
     }
 }

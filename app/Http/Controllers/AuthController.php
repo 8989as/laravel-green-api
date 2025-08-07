@@ -22,35 +22,79 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        \Log::info('Registration attempt', [
+            'data' => $request->all(),
+            'phone_number' => $request->phone_number,
+        ]);
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'phone_number' => 'required|string|unique:customers,phone_number',
             'otp' => 'required|string',
         ]);
+
         if ($validator->fails()) {
+            \Log::error('Registration validation failed', [
+                'errors' => $validator->errors(),
+                'data' => $request->all(),
+            ]);
+
             return response()->json(['error' => $validator->errors()], 422);
         }
 
+        // Normalize phone number for cache lookup
+        $phoneNumber = ltrim($request->phone_number, '+');
+
         // Verify OTP
-        $cachedOtp = Cache::get('otp_'.$request->phone_number);
+        $cachedOtp = Cache::get('otp_'.$phoneNumber);
+        \Log::info('OTP verification', [
+            'original_phone' => $request->phone_number,
+            'normalized_phone' => $phoneNumber,
+            'provided_otp' => $request->otp,
+            'cached_otp' => $cachedOtp,
+            'cache_key' => 'otp_'.$phoneNumber,
+        ]);
+
         if (! $cachedOtp || $cachedOtp != $request->otp) {
+            \Log::error('OTP verification failed', [
+                'original_phone' => $request->phone_number,
+                'normalized_phone' => $phoneNumber,
+                'provided_otp' => $request->otp,
+                'cached_otp' => $cachedOtp,
+            ]);
+
             return response()->json(['error' => 'Invalid or expired OTP'], 401);
         }
 
-        // Create new customer
-        $customer = Customer::create([
-            'name' => $request->name,
-            'phone_number' => $request->phone_number,
-        ]);
+        try {
+            // Create new customer
+            $customer = Customer::create([
+                'name' => $request->name,
+                'phone_number' => $request->phone_number,
+            ]);
 
-        $token = $customer->createToken('auth_token')->plainTextToken;
-        Cache::forget('otp_'.$request->phone_number);
+            \Log::info('Customer created successfully', [
+                'customer_id' => $customer->id,
+                'name' => $customer->name,
+                'phone_number' => $customer->phone_number,
+            ]);
 
-        return response()->json([
-            'message' => 'Registration successful',
-            'token' => $token,
-            'customer' => $customer,
-        ]);
+            $token = $customer->createToken('auth_token')->plainTextToken;
+            Cache::forget('otp_'.$phoneNumber);
+
+            return response()->json([
+                'message' => 'Registration successful',
+                'token' => $token,
+                'customer' => $customer,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Customer creation failed', [
+                'error' => $e->getMessage(),
+                'data' => $request->all(),
+            ]);
+
+            return response()->json(['error' => 'Registration failed: '.$e->getMessage()], 500);
+        }
     }
 
     /**
@@ -66,8 +110,11 @@ class AuthController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
+        // Normalize phone number for cache lookup
+        $phoneNumber = ltrim($request->phone_number, '+');
+
         // Verify OTP
-        $cachedOtp = Cache::get('otp_'.$request->phone_number);
+        $cachedOtp = Cache::get('otp_'.$phoneNumber);
         if (! $cachedOtp || $cachedOtp != $request->otp) {
             return response()->json(['error' => 'Invalid or expired OTP'], 401);
         }
@@ -79,7 +126,7 @@ class AuthController extends Controller
         }
 
         $token = $customer->createToken('auth_token')->plainTextToken;
-        Cache::forget('otp_'.$request->phone_number);
+        Cache::forget('otp_'.$phoneNumber);
 
         return response()->json([
             'message' => 'Login successful',
@@ -100,9 +147,24 @@ class AuthController extends Controller
             return response()->json(['error' => $validator->errors()], 422);
         }
 
+        // Normalize phone number (remove + if present)
+        $phoneNumber = ltrim($request->phone_number, '+');
+
         $otp = random_int(100000, 999999);
-        Cache::put('otp_'.$request->phone_number, $otp, now()->addMinutes(5));
-        $this->vonageService->sendOtp($request->phone_number, $otp);
+        Cache::put('otp_'.$phoneNumber, $otp, now()->addMinutes(5));
+
+        // Log the OTP for debugging (remove in production)
+        \Log::info('OTP generated for '.$phoneNumber.': '.$otp, [
+            'original_phone' => $request->phone_number,
+            'normalized_phone' => $phoneNumber,
+            'cache_key' => 'otp_'.$phoneNumber,
+        ]);
+
+        $sent = $this->vonageService->sendOtp($phoneNumber, $otp);
+
+        if (! $sent) {
+            return response()->json(['error' => 'Failed to send OTP. Please try again.'], 500);
+        }
 
         return response()->json(['message' => 'OTP sent to WhatsApp']);
     }

@@ -10,12 +10,11 @@ const RegisterForm = () => {
   const { sendOtp, register, error, resetState, loading } = useAuth();
 
   const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
+    name: '',
     phone_number: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState('form'); // 'form' | 'otp'
+  const [step, setStep] = useState('phone'); // 'phone' | 'otp' | 'name'
   const [otp, setOtp] = useState(['', '', '', '', '', '']); // 6 digits for OTP
   const inputRefs = [useRef(), useRef(), useRef(), useRef(), useRef(), useRef()];
 
@@ -53,12 +52,11 @@ const RegisterForm = () => {
     }
   };
 
-  // Handle form submission (send OTP)
-  const handleFormSubmit = async (e) => {
+  // Handle phone submission (send OTP)
+  const handlePhoneSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!formData.phone_number || !formData.first_name) {
+    if (!formData.phone_number) {
       return;
     }
 
@@ -66,9 +64,11 @@ const RegisterForm = () => {
 
     try {
       const result = await sendOtp(formData.phone_number);
+      console.log('Send OTP result:', result); // Debug log
       if (result.success) {
-        localStorage.setItem('temp_user_data', JSON.stringify(formData));
         setStep('otp');
+      } else {
+        console.error('Send OTP failed:', result.error);
       }
     } catch (error) {
       console.error('Send OTP error:', error);
@@ -77,24 +77,42 @@ const RegisterForm = () => {
     }
   };
 
-  // Handle OTP submit (register)
+  // Handle OTP verification (move to name step)
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     const otpValue = otp.join('');
     if (otpValue.length !== 6) return;
+
+    // Just move to name step - we'll verify OTP during final registration
+    setStep('name');
+  };
+
+  // Handle final registration with name
+  const handleNameSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.name) {
+      return;
+    }
+
     setIsSubmitting(true);
+    const otpValue = otp.join('');
+
     try {
-      const userData = JSON.parse(localStorage.getItem('temp_user_data') || '{}');
       const result = await register({
-        ...userData,
+        name: formData.name,
+        phone_number: formData.phone_number,
         otp: otpValue
       });
+      console.log('Registration result:', result); // Debug log
       if (result.success) {
-        setStep('form');
+        // Reset form
+        setStep('phone');
         setOtp(['', '', '', '', '', '']);
-        setFormData({ first_name: '', last_name: '', phone_number: '' });
-        localStorage.removeItem('temp_user_data');
+        setFormData({ name: '', phone_number: '' });
         resetState();
+      } else {
+        console.error('Registration failed:', result.error);
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -103,44 +121,30 @@ const RegisterForm = () => {
     }
   };
 
-  // Allow user to go back to form
+  // Allow user to go back
   const handleBack = () => {
-    setStep('form');
-    setOtp(['', '', '', '', '', '']);
+    if (step === 'otp') {
+      setStep('phone');
+      setOtp(['', '', '', '', '', '']);
+    } else if (step === 'name') {
+      setStep('otp');
+    }
     resetState();
   };
 
+  const getFormHandler = () => {
+    if (step === 'phone') return handlePhoneSubmit;
+    if (step === 'otp') return handleOtpSubmit;
+    if (step === 'name') return handleNameSubmit;
+  };
+
   return (
-    <Form className={`auth-form ${isRTL ? 'text-end' : 'text-start'}`} onSubmit={step === 'form' ? handleFormSubmit : handleOtpSubmit}>
+    <Form className={`auth-form ${isRTL ? 'text-end' : 'text-start'}`} onSubmit={getFormHandler()}>
       {error && <div className="alert alert-danger">{error}</div>}
 
-      {step === 'form' && (
+      {step === 'phone' && (
         <>
-          <Form.Group className="mb-3">
-            <Form.Label>{t('firstName')}</Form.Label>
-            <Form.Control
-              type="text"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              placeholder={t('enterYourFirstName')}
-              className="auth-input"
-              required
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
-            <Form.Label>{t('lastName')}</Form.Label>
-            <Form.Control
-              type="text"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              placeholder={t('enterYourLastName')}
-              className="auth-input"
-            />
-          </Form.Group>
-
+          {/* <h2 className="text-center mb-4">{t('register')}</h2> */}
           <Form.Group className="mb-4">
             <Form.Label>{t('phoneNumber')}</Form.Label>
             <Form.Control
@@ -157,7 +161,7 @@ const RegisterForm = () => {
           <Button
             type="submit"
             className="auth-submit-button w-100"
-            disabled={!formData.phone_number || !formData.first_name || isSubmitting || loading}
+            disabled={!formData.phone_number || isSubmitting || loading}
           >
             {(isSubmitting || loading) ? (
               <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -202,6 +206,50 @@ const RegisterForm = () => {
               type="submit"
               className="otp-button"
               disabled={otp.join('').length !== 6 || isSubmitting || loading}
+            >
+              {(isSubmitting || loading) ? (
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              ) : null}
+              {t('verify')}
+            </Button>
+          </div>
+        </>
+      )}
+
+      {step === 'name' && (
+        <>
+          <h2 className="text-center mb-4">{t('completeRegistration')}</h2>
+          <p className="text-center mb-4 text-muted">
+            {t('phoneVerified')} {formData.phone_number}
+          </p>
+
+          <Form.Group className="mb-4">
+            <Form.Label>{t('firstName')}</Form.Label>
+            <Form.Control
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder={t('enterYourFirstName')}
+              className="auth-input"
+              required
+              autoFocus
+            />
+          </Form.Group>
+
+          <div className="d-flex justify-content-between">
+            <Button
+              variant="secondary"
+              className="auth-cancel-button"
+              onClick={handleBack}
+              disabled={isSubmitting || loading}
+            >
+              {t('back')}
+            </Button>
+            <Button
+              type="submit"
+              className="auth-submit-button"
+              disabled={!formData.name || isSubmitting || loading}
             >
               {(isSubmitting || loading) ? (
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>

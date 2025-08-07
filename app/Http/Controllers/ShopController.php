@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Traits\FormatsProductImages;
 use App\Models\Category;
 use App\Models\Color;
+use App\Models\Occasion;
 use App\Models\Product;
 use App\Models\Size;
 use Illuminate\Http\Request;
@@ -57,11 +58,12 @@ class ShopController extends Controller
         ]);
     }
 
-    public function gifts()
+    public function gifts(Request $request)
     {
-        $products = Product::with(['category', 'sizes', 'colors', 'media', 'attributes'])
+        $products = Product::with(['category', 'sizes', 'colors', 'media', 'attributes', 'occasions'])
             ->where('is_active', true)
             ->where('is_gift', true)
+            ->filter($request->only(['size', 'color', 'price', 'occasion', 'min_price', 'max_price']))
             ->paginate(12);
 
         // Format products with proper image data
@@ -74,6 +76,7 @@ class ShopController extends Controller
             'categories' => Category::all(),
             'sizes' => Size::all(),
             'colors' => Color::all(),
+            'occasions' => Occasion::where('is_active', true)->get(),
         ]);
     }
 

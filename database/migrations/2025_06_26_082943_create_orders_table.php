@@ -14,10 +14,16 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
-            $table->decimal('total', 10, 2);
+            $table->string('customer_name')->nullable();
+            $table->string('customer_phone');
+            $table->string('order_number')->unique();
+            $table->string('payment_method');
+            $table->string('payment_status')->default('pending');
+            $table->string('order_date');
+            $table->string('delivery_date');
             $table->text('shipping_address');
-            $table->text('billing_address')->nullable();
             $table->string('status')->default('pending');
+            $table->decimal('total', 10, 2);    
             $table->timestamps();
         });
     }

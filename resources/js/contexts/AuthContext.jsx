@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
 
       const response = await axios.post('/api/register', {
-        name: `${userData.first_name} ${userData.last_name}`.trim(),
+        name: userData.name,
         phone_number: userData.phone_number,
         otp: userData.otp
       });

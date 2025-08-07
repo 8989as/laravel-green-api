@@ -6,6 +6,7 @@ const SideBar = ({
   categories = [],
   colors = [],
   sizes = [],
+  occasions = [],
   priceRange = { min: 0, max: 1000 },
   isGift = false,
   giftFilters = {},
@@ -20,6 +21,7 @@ const SideBar = ({
     categories: initialFilters.categories || [],
     colors: initialFilters.colors || [],
     sizes: initialFilters.sizes || [],
+    occasions: initialFilters.occasions || [],
     priceRange: initialFilters.priceRange || [priceRange.min, priceRange.max],
     ...initialFilters
   });
@@ -57,7 +59,8 @@ const SideBar = ({
           const itemName = item.name || item.label ||
             (filterKey === 'categories' ? (isRTL ? item.category_ar : item.category_en) :
               filterKey === 'sizes' ? (isRTL ? item.size_ar : item.size_en) :
-                filterKey === 'colors' ? (isRTL ? item.color_ar : item.color_en) : '');
+                filterKey === 'colors' ? (isRTL ? item.color_ar : item.color_en) :
+                  filterKey === 'occasions' ? (isRTL ? item.name_ar : item.name_en) : '');
 
           return (
             <div key={itemId} className="form-check">
@@ -180,52 +183,68 @@ const SideBar = ({
     </div>
   );
 
-  const renderGiftFilters = () => {
-    if (!isGift || !giftFilters) return null;
+  const renderOccasionSection = () => {
+    if (!isGift || occasions.length === 0) return null;
 
     return (
-      <div className="gift-filters">
-        <h5 className="section-title">{isRTL ? 'خيارات الهدايا' : 'Gift Options'}</h5>
-        {giftFilters.occasions && renderCheckboxSection(
-          isRTL ? 'المناسبات' : 'Occasions',
-          giftFilters.occasions,
-          'occasions'
-        )}
-        {giftFilters.recipients && renderCheckboxSection(
-          isRTL ? 'المستلمين' : 'Recipients',
-          giftFilters.recipients,
-          'recipients'
-        )}
-        {giftFilters.themes && renderCheckboxSection(
-          isRTL ? 'المواضيع' : 'Themes',
-          giftFilters.themes,
-          'themes'
-        )}
+      <div className="filter-section">
+        <h5 className="section-title">{isRTL ? 'المناسبات' : 'Occasions'}</h5>
+        <div className="filter-options">
+          {occasions.map((occasion) => {
+            const occasionName = isRTL ? occasion.name_ar : occasion.name_en;
+            return (
+              <div key={occasion.id} className="form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id={`occasion-${occasion.id}`}
+                  checked={filters.occasions.includes(occasion.id)}
+                  onChange={(e) => handleFilterChange('occasions', occasion.id, e.target.checked)}
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor={`occasion-${occasion.id}`}
+                >
+                  {occasion.icon && <span className="occasion-icon">{occasion.icon}</span>}
+                  {occasionName}
+                </label>
+              </div>
+            );
+          })}
+        </div>
       </div>
     );
   };
 
   return (
     <div className={`sidebar-container ${isRTL ? 'rtl' : 'ltr'}`}>
-      <h3 className="filter-title">{isRTL ? 'تصفية المنتجات' : 'Filter Products'}</h3>
+      <h3 className="filter-title">
+        {isGift
+          ? (isRTL ? 'تصفية الهدايا' : 'Filter Gifts')
+          : (isRTL ? 'تصفية المنتجات' : 'Filter Products')
+        }
+      </h3>
 
-      {categories.length > 0 && renderCheckboxSection(
+      {/* Show occasions filter only for gift products */}
+      {isGift && renderOccasionSection()}
+
+      {/* Show regular filters only for non-gift products */}
+      {!isGift && categories.length > 0 && renderCheckboxSection(
         isRTL ? 'الفئات' : 'Categories',
         categories,
         'categories'
       )}
 
-      {colors.length > 0 && renderColorSection()}
+      {!isGift && colors.length > 0 && renderColorSection()}
 
-      {sizes.length > 0 && renderCheckboxSection(
+      {!isGift && sizes.length > 0 && renderCheckboxSection(
         isRTL ? 'الأحجام' : 'Sizes',
         sizes,
         'sizes'
       )}
 
+      {/* Price filter is shown for both gift and regular products */}
       {renderPriceSection()}
-
-      {renderGiftFilters()}
 
       <button
         className="btn btn-primary filter-apply-btn w-100 mt-4"

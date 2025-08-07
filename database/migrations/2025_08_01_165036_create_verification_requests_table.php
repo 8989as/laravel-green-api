@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('phone_number');
             $table->string('request_id');
             $table->enum('status', ['pending', 'verified', 'failed', 'expired']);
+            $table->string('verification_code', 10)->nullable();
             $table->timestamp('expires_at');
             $table->timestamps();
         });

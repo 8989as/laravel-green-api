@@ -31,13 +31,16 @@ const AuthModal = ({ show, onHide, initialTab = 'login', returnUrl = null }) => 
   useEffect(() => {
     // If user becomes authenticated and modal is shown, close it and redirect if needed
     if (isAuthenticated && show) {
-      // First close the modal
-      onHide();
+      // Add a small delay to ensure registration process is complete
+      setTimeout(() => {
+        // First close the modal
+        onHide();
 
-      // Then redirect if we have a URL to go back to
-      if (redirectTo) {
-        navigate(redirectTo, { replace: true });
-      }
+        // Then redirect if we have a URL to go back to
+        if (redirectTo) {
+          navigate(redirectTo, { replace: true });
+        }
+      }, 500);
     }
   }, [isAuthenticated, show, onHide, redirectTo, navigate]);
 
