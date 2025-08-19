@@ -59,28 +59,30 @@ function App() {
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/events" element={<EventsPage />} />
-
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/profile" element={ <Profile />} />
+                    <Route path="/checkout" element={ <Checkout />} />
                     {/* Protected Routes */}
-                    <Route path="/cart" element={
+                    {/* <Route path="/cart" element={
                       <ProtectedRoute>
                         <Cart />
                       </ProtectedRoute>
-                    } />
-                    <Route path="/checkout" element={
+                    } /> */}
+                    {/* <Route path="/checkout" element={
                       <ProtectedRoute>
                         <Checkout />
                       </ProtectedRoute>
-                    } />
+                    } /> */}
                     <Route path="/orders" element={
                       <ProtectedRoute>
                         <Orders />
                       </ProtectedRoute>
                     } />
-                    <Route path="/profile" element={
+                    {/* <Route path="/profile" element={
                       <ProtectedRoute>
                         <Profile />
                       </ProtectedRoute>
-                    } />
+                    } /> */}
                     <Route path="/wishlist" element={
                       <ProtectedRoute>
                         <Orders />

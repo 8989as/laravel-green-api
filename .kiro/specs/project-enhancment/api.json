@@ -1,0 +1,24 @@
+{
+  "cart": {
+    "id": 1,
+    "user_id": 123,
+    "items": [
+      {
+        "id": 1,
+        "product_id": 456,
+        "quantity": 2,
+        "price": 29.99,
+        "product": {
+          "id": 456,
+          "name": "Product Name",
+          "price": 29.99,
+          "image": "http://example.com/storage/product.jpg"
+        }
+      }
+    ],
+    "subtotal": 59.98,
+    "shipping": 5.99,
+    "tax": 5.20,
+    "total": 71.17
+  }
+}
