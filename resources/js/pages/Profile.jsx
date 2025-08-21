@@ -1,26 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../components/Breadcrumb/Breadcrumb';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faUser,
-  faBox,
-  faHeart,
-  faAddressBook,
-  faCreditCard,
-  faSignOutAlt,
-  faSpinner,
-  faExclamationTriangle
-} from '@fortawesome/free-solid-svg-icons';
+import Navbar from '../components/Navbar/Navbar';
+import Footer from '../components/Footer/Footer';
 import './Profile.css';
 import { useAccount } from '../contexts/AccountContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useOrders } from '../contexts/OrderContext';
+
+// Simple icon components to replace FontAwesome
+const UserIcon = () => <span>👤</span>;
+const BoxIcon = () => <span>📦</span>;
+const HeartIcon = () => <span>❤️</span>;
+const AddressBookIcon = () => <span>📍</span>;
+const CreditCardIcon = () => <span>💳</span>;
+const SignOutIcon = () => <span>🚪</span>;
+const SpinnerIcon = () => <div className="spinner-border spinner-border-sm" role="status"><span className="visually-hidden">Loading...</span></div>;
+const WarningIcon = () => <span>⚠️</span>;
+const EditIcon = () => <span>✏️</span>;
+const PlusIcon = () => <span>➕</span>;
 
 const Profile = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
+  const navigate = useNavigate();
   const { profile, addresses, loading, error, fetchProfile, fetchAddresses } = useAccount();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { orders, getRecentOrders, fetchOrders } = useOrders();
+
+  const [activeTab, setActiveTab] = useState('profile');
+  const [recentOrders, setRecentOrders] = useState([]);
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -29,9 +39,41 @@ const Profile = () => {
   ];
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
     fetchProfile();
     fetchAddresses();
-  }, []);
+    fetchOrders().then(() => {
+      setRecentOrders(getRecentOrders());
+    });
+  }, [isAuthenticated, navigate]);
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Get status badge class
+  const getStatusBadgeClass = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return 'bg-warning';
+      case 'processing':
+        return 'bg-info';
+      case 'shipped':
+        return 'bg-primary';
+      case 'delivered':
+        return 'bg-success';
+      case 'cancelled':
+        return 'bg-danger';
+      default:
+        return 'bg-secondary';
+    }
+  };
 
   // Format date for display
   const formatDate = (dateString) => {
@@ -47,19 +89,19 @@ const Profile = () => {
 
   return (
     <>
+      <Navbar />
       <Breadcrumb items={breadcrumbItems} />
       <div className="container py-5">
         <h1 className="mb-4">{t('myAccount')}</h1>
         {error && (
           <div className="alert alert-danger" role="alert">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="me-2" />
-            {error}
+            <WarningIcon /> {error}
           </div>
         )}
         {loading ? (
           <div className="text-center py-5">
-            <FontAwesomeIcon icon={faSpinner} spin size="2x" />
-            <p className="mt-3">{t('loadingProfile')}</p>
+            <SpinnerIcon />
+            <p className="mt-3">{t('loadingProfile') || 'جاري تحميل الملف الشخصي...'}</p>
           </div>
         ) : userData && (
           <div className="row">
@@ -79,46 +121,40 @@ const Profile = () => {
                     </div>
                   </div>
                   <ul className="profile-nav">
-                    <li className="active">
-                      <a href="/profile">
-                        <FontAwesomeIcon icon={faUser} className={isRTL ? 'ms-2' : 'me-2'} />
-                        {t('accountDetails')}
+                    <li className={activeTab === 'profile' ? 'active' : ''}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('profile'); }}>
+                        <UserIcon />
+                        <span className={isRTL ? 'me-2' : 'ms-2'}>{t('accountDetails') || 'تفاصيل الحساب'}</span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/orders">
-                        <FontAwesomeIcon icon={faBox} className={isRTL ? 'ms-2' : 'me-2'} />
-                        {t('myOrders')}
+                    <li className={activeTab === 'orders' ? 'active' : ''}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('orders'); }}>
+                        <BoxIcon />
+                        <span className={isRTL ? 'me-2' : 'ms-2'}>{t('myOrders') || 'طلباتي'}</span>
                         <span className="badge bg-primary rounded-pill">
-                          {userData.orders_count || 0}
+                          {orders?.length || 0}
                         </span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/wishlist">
-                        <FontAwesomeIcon icon={faHeart} className={isRTL ? 'ms-2' : 'me-2'} />
-                        {t('wishlist')}
+                    <li className={activeTab === 'wishlist' ? 'active' : ''}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('wishlist'); }}>
+                        <HeartIcon />
+                        <span className={isRTL ? 'me-2' : 'ms-2'}>{t('wishlist') || 'المفضلة'}</span>
                         <span className="badge bg-primary rounded-pill">
                           {userData.wishlist_count || 0}
                         </span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/addresses">
-                        <FontAwesomeIcon icon={faAddressBook} className={isRTL ? 'ms-2' : 'me-2'} />
-                        {t('addresses')}
+                    <li className={activeTab === 'addresses' ? 'active' : ''}>
+                      <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('addresses'); }}>
+                        <AddressBookIcon />
+                        <span className={isRTL ? 'me-2' : 'ms-2'}>{t('addresses') || 'العناوين'}</span>
                       </a>
                     </li>
                     <li>
-                      <a href="/payment-methods">
-                        <FontAwesomeIcon icon={faCreditCard} className={isRTL ? 'ms-2' : 'me-2'} />
-                        {t('paymentMethods')}
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="text-danger" onClick={e => { e.preventDefault(); logout(); }}>
-                        <FontAwesomeIcon icon={faSignOutAlt} className={isRTL ? 'ms-2' : 'me-2'} />
-                        {t('logout')}
+                      <a href="#" className="text-danger" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                        <SignOutIcon />
+                        <span className={isRTL ? 'me-2' : 'ms-2'}>{t('logout') || 'تسجيل الخروج'}</span>
                       </a>
                     </li>
                   </ul>
@@ -127,149 +163,182 @@ const Profile = () => {
             </div>
             {/* Main Content */}
             <div className="col-lg-9">
-              <div className="card border-0 shadow-sm">
-                <div className="card-header bg-white d-flex justify-content-between align-items-center">
-                  <h5 className="mb-0">{t('accountDetails')}</h5>
-                  <button className="btn btn-sm btn-outline-primary">
-                    {t('editProfile')}
-                  </button>
-                </div>
-                <div className="card-body">
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <h6>{t('name')}</h6>
-                      <p>{userData.first_name || userData.name}</p>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <h6>{t('email')}</h6>
-                      <p>{userData.email || '-'}</p>
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <h6>{t('phone')}</h6>
-                      <p>{userData.phone}</p>
-                    </div>
-                    <div className="col-12">
-                      <hr />
-                      <h6>{t('addresses')}</h6>
-                      {(addresses && addresses.length > 0 ? addresses : userData.addresses || []).map(address => (
-                        <div key={address.id} className="address-card p-3 mb-2">
-                          <div className="d-flex justify-content-between">
-                            <strong>{address.type || t('address')}</strong>
-                            <div>
-                              <button className="btn btn-sm btn-link">{t('edit')}</button>
-                              <button className="btn btn-sm btn-link text-danger">{t('delete')}</button>
-                            </div>
-                          </div>
-                          <p className="mb-0">{address.address}</p>
-                          <p className="mb-0">{address.city}, {address.postal_code}</p>
-                        </div>
-                      ))}
-                      <div className="mt-3">
-                        <button className="btn btn-outline-primary">
-                          + {t('addNewAddress')}
-                        </button>
+              {/* Account Details Tab */}
+              {activeTab === 'profile' && (
+                <div className="card border-0 shadow-sm">
+                  <div className="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">{t('accountDetails') || 'تفاصيل الحساب'}</h5>
+                    <button className="btn btn-sm btn-outline-primary">
+                      <EditIcon />
+                      <span className="ms-1">{t('editProfile') || 'تعديل الملف الشخصي'}</span>
+                    </button>
+                  </div>
+                  <div className="card-body">
+                    <div className="row">
+                      <div className="col-md-6 mb-3">
+                        <h6>{t('name') || 'الاسم'}</h6>
+                        <p>{userData.first_name || userData.name}</p>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <h6>{t('email') || 'البريد الإلكتروني'}</h6>
+                        <p>{userData.email || '-'}</p>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <h6>{t('phone') || 'رقم الهاتف'}</h6>
+                        <p>{userData.phone}</p>
+                      </div>
+                      <div className="col-md-6 mb-3">
+                        <h6>{t('memberSince') || 'عضو منذ'}</h6>
+                        <p>{userData.created_at ? formatDate(userData.created_at) : '-'}</p>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              {/* Recent Orders - TODO: Replace with real data */}
-              <div className="card border-0 shadow-sm mt-4">
-                <div className="card-header bg-white d-flex justify-content-between align-items-center">
-                  <h5 className="mb-0">{t('recentOrders')}</h5>
-                  <a href="/orders" className="btn btn-sm btn-link">
-                    {t('viewAll')} →
-                  </a>
-                </div>
-                <div className="card-body p-0">
-                  <div className="table-responsive">
-                    <table className="table mb-0">
-                      <thead className="bg-light">
-                        <tr>
-                          <th>{t('orderId')}</th>
-                          <th>{t('date')}</th>
-                          <th>{t('total')}</th>
-                          <th>{t('status')}</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {/* TODO: Map real recent orders here */}
-                        <tr>
-                          <td>#10045</td>
-                          <td>2023-05-20</td>
-                          <td>
-                            325.00
-                            <img 
-                              src="/assets/images/sar.svg" 
-                              alt="SAR" 
-                              className="price-symbol-img" 
-                            />
-                          </td>
-                          <td>
-                            <span className="badge bg-success">
-                              {t('delivered')}
-                            </span>
-                          </td>
-                          <td>
-                            <a href="/orders/10045" className="btn btn-sm btn-link">
-                              {t('view')}
-                            </a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>#10044</td>
-                          <td>2023-04-15</td>
-                          <td>
-                            180.50
-                            <img 
-                              src="/assets/images/sar.svg" 
-                              alt="SAR" 
-                              className="price-symbol-img" 
-                            />
-                          </td>
-                          <td>
-                            <span className="badge bg-success">
-                              {t('delivered')}
-                            </span>
-                          </td>
-                          <td>
-                            <a href="/orders/10044" className="btn btn-sm btn-link">
-                              {t('view')}
-                            </a>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>#10043</td>
-                          <td>2023-03-10</td>
-                          <td>
-                            450.75
-                            <img 
-                              src="/assets/images/sar.svg" 
-                              alt="SAR" 
-                              className="price-symbol-img" 
-                            />
-                          </td>
-                          <td>
-                            <span className="badge bg-success">
-                              {t('delivered')}
-                            </span>
-                          </td>
-                          <td>
-                            <a href="/orders/10043" className="btn btn-sm btn-link">
-                              {t('view')}
-                            </a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+              )}
+
+              {/* Addresses Tab */}
+              {activeTab === 'addresses' && (
+                <div className="card border-0 shadow-sm">
+                  <div className="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">{t('addresses') || 'العناوين'}</h5>
+                    <button className="btn btn-sm btn-primary">
+                      <PlusIcon />
+                      <span className="ms-1">{t('addNewAddress') || 'إضافة عنوان جديد'}</span>
+                    </button>
+                  </div>
+                  <div className="card-body">
+                    {(addresses && addresses.length > 0 ? addresses : userData.addresses || []).length > 0 ? (
+                      (addresses && addresses.length > 0 ? addresses : userData.addresses || []).map(address => (
+                        <div key={address.id} className="address-card p-3 mb-3 border rounded">
+                          <div className="d-flex justify-content-between align-items-start">
+                            <div>
+                              <strong>{address.type || t('address') || 'عنوان'}</strong>
+                              <p className="mb-1 mt-2">{address.address}</p>
+                              <p className="mb-0 text-muted">{address.city}, {address.postal_code}</p>
+                            </div>
+                            <div>
+                              <button className="btn btn-sm btn-outline-primary me-2">
+                                <EditIcon />
+                                <span className="ms-1">{t('edit') || 'تعديل'}</span>
+                              </button>
+                              <button className="btn btn-sm btn-outline-danger">
+                                {t('delete') || 'حذف'}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">
+                        <AddressBookIcon />
+                        <h6 className="mt-3">{t('noAddresses') || 'لا توجد عناوين'}</h6>
+                        <p className="text-muted">{t('noAddressesMessage') || 'لم تقم بإضافة أي عناوين بعد'}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* Orders Tab */}
+              {activeTab === 'orders' && (
+                <div className="card border-0 shadow-sm">
+                  <div className="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0">{t('myOrders') || 'طلباتي'}</h5>
+                    <button
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => navigate('/orders')}
+                    >
+                      {t('viewAll') || 'عرض الكل'}
+                    </button>
+                  </div>
+                  <div className="card-body p-0">
+                    {recentOrders.length > 0 ? (
+                      <div className="table-responsive">
+                        <table className="table mb-0">
+                          <thead className="bg-light">
+                            <tr>
+                              <th>{t('orderId') || 'رقم الطلب'}</th>
+                              <th>{t('date') || 'التاريخ'}</th>
+                              <th>{t('total') || 'الإجمالي'}</th>
+                              <th>{t('status') || 'الحالة'}</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {recentOrders.map((order) => (
+                              <tr key={order.id}>
+                                <td>#{order.id}</td>
+                                <td>{formatDate(order.created_at)}</td>
+                                <td>
+                                  {order.total}
+                                  <img
+                                    src="/assets/images/sar.svg"
+                                    alt="SAR"
+                                    className="price-symbol-img"
+                                  />
+                                </td>
+                                <td>
+                                  <span className={`badge ${getStatusBadgeClass(order.status)}`}>
+                                    {order.status}
+                                  </span>
+                                </td>
+                                <td>
+                                  <button
+                                    className="btn btn-sm btn-outline-primary"
+                                    onClick={() => navigate(`/orders`)}
+                                  >
+                                    {t('view') || 'عرض'}
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-4">
+                        <BoxIcon />
+                        <h6 className="mt-3">{t('noOrders') || 'لا توجد طلبات'}</h6>
+                        <p className="text-muted">{t('noOrdersMessage') || 'لم تقم بأي طلبات بعد'}</p>
+                        <button
+                          className="btn btn-primary"
+                          onClick={() => navigate('/products')}
+                        >
+                          {t('startShopping') || 'ابدأ التسوق'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Wishlist Tab */}
+              {activeTab === 'wishlist' && (
+                <div className="card border-0 shadow-sm">
+                  <div className="card-header bg-white">
+                    <h5 className="mb-0">{t('wishlist') || 'المفضلة'}</h5>
+                  </div>
+                  <div className="card-body">
+                    <div className="text-center py-4">
+                      <HeartIcon />
+                      <h6 className="mt-3">{t('noWishlistItems') || 'لا توجد منتجات مفضلة'}</h6>
+                      <p className="text-muted">{t('noWishlistMessage') || 'لم تقم بإضافة أي منتجات للمفضلة بعد'}</p>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => navigate('/products')}
+                      >
+                        {t('browseProducts') || 'تصفح المنتجات'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         )}
       </div>
+      <Footer />
     </>
   );
 };

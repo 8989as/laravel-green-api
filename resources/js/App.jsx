@@ -17,15 +17,18 @@ import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 import ProductDetails from './pages/ProductDetails';
 import EventsPage from './pages/EventsPage';
+import OrderConfirmation from './pages/OrderConfirmation';
 
 // Import components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 // Import context providers
-import { AuthProvider } from './contexts/AuthContext.jsx';
+import { UserProvider } from './contexts/UserContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
 import { WishlistProvider } from './contexts/WishlistContext.jsx';
 import { OrderProvider } from './contexts/OrderContext.jsx';
+// Keep legacy providers for backward compatibility
+import { AuthProvider } from './contexts/AuthContext.jsx';
 import { AccountProvider } from './contexts/AccountContext.jsx';
 
 import { ToastContainer } from 'react-toastify';
@@ -43,72 +46,75 @@ function App() {
   const toastPosition = i18n.language === 'ar' ? 'bottom-left' : 'bottom-right';
 
   return (
-    <AuthProvider>
-      <AccountProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <OrderProvider>
-              <Router>
-                <div className="app">
-                  <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<Home />} />
-                    <Route path="/products" element={<AllProducts />} />
-                    <Route path="/product/:id" element={<ProductDetails />} />
-                    <Route path="/landscape" element={<Landscape />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/contact" element={<Contact />} />
-                    <Route path="/events" element={<EventsPage />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/profile" element={ <Profile />} />
-                    <Route path="/checkout" element={ <Checkout />} />
-                    {/* Protected Routes */}
-                    {/* <Route path="/cart" element={
+    <UserProvider>
+      <AuthProvider>
+        <AccountProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <OrderProvider>
+                <Router>
+                  <div className="app">
+                    <Routes>
+                      {/* Public Routes */}
+                      <Route path="/" element={<Home />} />
+                      <Route path="/products" element={<AllProducts />} />
+                      <Route path="/product/:id" element={<ProductDetails />} />
+                      <Route path="/landscape" element={<Landscape />} />
+                      <Route path="/about" element={<About />} />
+                      <Route path="/contact" element={<Contact />} />
+                      <Route path="/events" element={<EventsPage />} />
+                      <Route path="/cart" element={<Cart />} />
+                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+                      {/* Protected Routes */}
+                      {/* <Route path="/cart" element={
                       <ProtectedRoute>
                         <Cart />
                       </ProtectedRoute>
                     } /> */}
-                    {/* <Route path="/checkout" element={
+                      {/* <Route path="/checkout" element={
                       <ProtectedRoute>
                         <Checkout />
                       </ProtectedRoute>
                     } /> */}
-                    <Route path="/orders" element={
-                      <ProtectedRoute>
-                        <Orders />
-                      </ProtectedRoute>
-                    } />
-                    {/* <Route path="/profile" element={
+                      <Route path="/orders" element={
+                        <ProtectedRoute>
+                          <Orders />
+                        </ProtectedRoute>
+                      } />
+                      {/* <Route path="/profile" element={
                       <ProtectedRoute>
                         <Profile />
                       </ProtectedRoute>
                     } /> */}
-                    <Route path="/wishlist" element={
-                      <ProtectedRoute>
-                        <Orders />
-                      </ProtectedRoute>
-                    } />
-                  </Routes>
+                      <Route path="/wishlist" element={
+                        <ProtectedRoute>
+                          <Orders />
+                        </ProtectedRoute>
+                      } />
+                    </Routes>
 
-                  {/* Toast notifications container */}
-                  <ToastContainer
-                    position={toastPosition}
-                    autoClose={3000}
-                    hideProgressBar={false}
-                    newestOnTop
-                    closeOnClick
-                    rtl={i18n.language === 'ar'}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                  />
-                </div>
-              </Router>
-            </OrderProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </AccountProvider>
-    </AuthProvider>
+                    {/* Toast notifications container */}
+                    <ToastContainer
+                      position={toastPosition}
+                      autoClose={3000}
+                      hideProgressBar={false}
+                      newestOnTop
+                      closeOnClick
+                      rtl={i18n.language === 'ar'}
+                      pauseOnFocusLoss
+                      draggable
+                      pauseOnHover
+                    />
+                  </div>
+                </Router>
+              </OrderProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </AccountProvider>
+      </AuthProvider>
+    </UserProvider>
   );
 }
 

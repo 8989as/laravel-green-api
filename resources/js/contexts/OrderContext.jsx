@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { useAuth } from './AuthContext.jsx';
+import { useUser } from './UserContext.jsx';
+import { useAuth } from './AuthContext.jsx'; // Keep for backward compatibility
 
 const OrderContext = createContext();
 
@@ -15,9 +16,24 @@ export const useOrders = () => {
 export const OrderProvider = ({ children }) => {
     const [orders, setOrders] = useState([]);
     const [currentOrder, setCurrentOrder] = useState(null);
+    const [checkoutData, setCheckoutData] = useState({
+        shippingAddress: null,
+        billingAddress: null,
+        paymentMethod: null,
+        orderNotes: ''
+    });
+    const [orderStats, setOrderStats] = useState({
+        total: 0,
+        pending: 0,
+        processing: 0,
+        shipped: 0,
+        delivered: 0,
+        cancelled: 0
+    });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const { isAuthenticated, token } = useAuth();
+    const [isProcessingOrder, setIsProcessingOrder] = useState(false);
+    const { isAuthenticated, token } = useUser();
 
     // Clear orders when user is not authenticated
     useEffect(() => {
@@ -163,18 +179,76 @@ export const OrderProvider = ({ children }) => {
         }
     };
 
+    // Create new order
+    const createOrder = async (orderData) => {
+        if (!isAuthenticated) {
+            throw new Error('Authentication required');
+        }
+
+        try {
+            setIsProcessingOrder(true);
+            setError(null);
+
+            const response = await axios.post('/api/orders', orderData);
+
+            if (response.data.success) {
+                const newOrder = response.data.order;
+                setCurrentOrder(newOrder);
+                setOrders(prevOrders => [newOrder, ...prevOrders]);
+
+                // Clear checkout data after successful order
+                setCheckoutData({
+                    shippingAddress: null,
+                    billingAddress: null,
+                    paymentMethod: null,
+                    orderNotes: ''
+                });
+
+                return { success: true, order: newOrder };
+            }
+            return { success: false, error: 'Failed to create order' };
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || 'Failed to create order';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setIsProcessingOrder(false);
+        }
+    };
+
+    // Update checkout data
+    const updateCheckoutData = (data) => {
+        setCheckoutData(prev => ({ ...prev, ...data }));
+    };
+
+    // Clear checkout data
+    const clearCheckoutData = () => {
+        setCheckoutData({
+            shippingAddress: null,
+            billingAddress: null,
+            paymentMethod: null,
+            orderNotes: ''
+        });
+    };
+
     // Get order statistics
     const getOrderStats = async () => {
         if (!isAuthenticated) {
-            return { total: 0, pending: 0, completed: 0, cancelled: 0 };
+            const emptyStats = { total: 0, pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+            setOrderStats(emptyStats);
+            return emptyStats;
         }
 
         try {
             const response = await axios.get('/api/profile/orders/stats');
-            return response.data.stats || response.data;
+            const stats = response.data.stats || response.data;
+            setOrderStats(stats);
+            return stats;
         } catch (err) {
             console.error('Failed to fetch order stats:', err);
-            return { total: 0, pending: 0, completed: 0, cancelled: 0 };
+            const emptyStats = { total: 0, pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 };
+            setOrderStats(emptyStats);
+            return emptyStats;
         }
     };
 
@@ -193,16 +267,29 @@ export const OrderProvider = ({ children }) => {
     };
 
     const value = {
+        // State
         orders,
         currentOrder,
+        checkoutData,
+        orderStats,
         loading,
         error,
+        isProcessingOrder,
+
+        // Order Management
         fetchOrders,
         fetchOrder,
+        createOrder,
         cancelOrder,
         reorderItems,
         getOrderTracking,
         getOrderStats,
+
+        // Checkout Management
+        updateCheckoutData,
+        clearCheckoutData,
+
+        // Utility functions
         getOrdersByStatus,
         getRecentOrders
     };

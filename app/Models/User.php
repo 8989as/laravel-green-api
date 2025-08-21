@@ -52,7 +52,7 @@ class User extends Authenticatable
     public function favorites()
     {
         return $this->belongsToMany(Product::class, 'user_favorites', 'user_id', 'product_id')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     /**
@@ -61,5 +61,29 @@ class User extends Authenticatable
     public function customer()
     {
         return $this->hasOne(Customer::class);
+    }
+
+    /**
+     * The user's orders through customer relationship
+     */
+    public function orders()
+    {
+        return $this->hasManyThrough(Order::class, Customer::class);
+    }
+
+    /**
+     * The user's carts through customer relationship
+     */
+    public function carts()
+    {
+        return $this->hasManyThrough(Cart::class, Customer::class);
+    }
+
+    /**
+     * Get the user's active cart
+     */
+    public function getActiveCartAttribute()
+    {
+        return $this->customer ? $this->customer->active_cart : null;
     }
 }

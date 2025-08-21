@@ -187,8 +187,20 @@ const resources = {
       size: 'الأحجام',
       color: 'الألوان',
       landscapingTitle: 'أعمال اللاندسكيب',
-      landscapingButton: 'اكتشف المزيد'
-
+      landscapingButton: 'اكتشف المزيد',
+      
+      // Missing translations for product listings
+      showingResults: 'عرض النتائج',
+      sortBy: 'الفرز حسب',
+      newest: 'الأحدث',
+      priceLowToHigh: 'السعر من الأقل إلى الأعلى',
+      priceHighToLow: 'السعر من الأعلى إلى الأقل',
+      loading: 'جاري التحميل...',
+      addToFavorites: 'إضافة إلى المفضلة',
+      addToCart: 'إضافة إلى السلة',
+      viewDetails: 'عرض التفاصيل',
+      freeShipping: 'شحن مجاني',
+      buyNow: 'شراء الآن'
     }
   },
   en: {

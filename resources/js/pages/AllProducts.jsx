@@ -302,7 +302,7 @@ const AllProducts = () => {
     return (
         <>
             <Navbar />
-               <Breadcrumb items={[
+            <Breadcrumb items={[
                 { label: t('home'), url: '/' },
                 { label: t('allProducts'), active: true }
             ]} />
@@ -326,17 +326,38 @@ const AllProducts = () => {
                     {/* Products */}
                     <div className="col-lg-9 col-md-8">
                         {/* Header */}
-                        <div className="d-flex justify-content-start align-items-start mb-4">
-                            <h1 className="mb-0">{t('allProducts') || 'كل المنتجات'}</h1>
-                            {/* {!loading && products.length > 0 && (
-                                <div className="text-muted">
-                                    {t('showingResults', {
-                                        from: pagination.from,
-                                        to: pagination.to,
-                                        total: pagination.total
-                                    }) || `عرض ${pagination.from}-${pagination.to} من ${pagination.total} منتج`}
-                                </div>
-                            )} */}
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h1 className="mb-0">{t('allProducts') || 'كل المنتجات'}</h1>
+                                {!loading && products.length > 0 && (
+                                    <div className="text-muted mt-1">
+                                        {t('showingResults', {
+                                            from: pagination.from,
+                                            to: pagination.to,
+                                            total: pagination.total
+                                        }) || `عرض ${pagination.from}-${pagination.to} من ${pagination.total} منتج`}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Sort Options */}
+                            <div className="d-flex align-items-center">
+                                <label className="me-2 text-muted">{t('sortBy') || 'ترتيب حسب'}:</label>
+                                <select
+                                    className="form-select form-select-sm"
+                                    style={{ width: 'auto' }}
+                                    onChange={(e) => {
+                                        const sortValue = e.target.value;
+                                        // Add sorting logic here if needed
+                                        console.log('Sort by:', sortValue);
+                                    }}
+                                >
+                                    <option value="newest">{t('newest') || 'الأحدث'}</option>
+                                    <option value="price_low">{t('priceLowToHigh') || 'السعر: من الأقل للأعلى'}</option>
+                                    <option value="price_high">{t('priceHighToLow') || 'السعر: من الأعلى للأقل'}</option>
+                                    <option value="name">{t('name') || 'الاسم'}</option>
+                                </select>
+                            </div>
                         </div>
 
                         {/* Loading State */}

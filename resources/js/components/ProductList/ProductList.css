@@ -1,0 +1,122 @@
+/* ProductList Component Styles */
+.product-list-container {
+    font-family: 'El Messiri', sans-serif;
+}
+
+.product-list-container.rtl {
+    direction: rtl;
+}
+
+.product-list-container.ltr {
+    direction: ltr;
+}
+
+/* Pagination Styles */
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-wrapper .btn {
+    min-width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.pagination-wrapper .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-wrapper .btn-primary {
+    background-color: #3D853C;
+    border-color: #3D853C;
+}
+
+.pagination-wrapper .btn-outline-primary {
+    color: #3D853C;
+    border-color: #3D853C;
+}
+
+.pagination-wrapper .btn-outline-primary:hover {
+    background-color: #3D853C;
+    border-color: #3D853C;
+}
+
+/* Loading and Error States */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.alert {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Product Grid Responsive */
+@media (max-width: 1200px) {
+    .product-list-container .col-xl-4 {
+        flex: 0 0 auto;
+        width: 50%;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .product-list-container .col-lg-6,
+    .product-list-container .col-md-6 {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+
+    .pagination-wrapper {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pagination-wrapper .btn {
+        min-width: 35px;
+        height: 35px;
+        font-size: 0.875rem;
+    }
+}
+
+/* Search and Filter Integration */
+.product-list-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.results-info {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-state i {
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: #6c757d;
+    max-width: 400px;
+    margin: 0 auto;
+}

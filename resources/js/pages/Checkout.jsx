@@ -2,24 +2,26 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useOrders } from '../contexts/OrderContext.jsx';
 import Breadcrumb from '../components/Breadcrumb/Breadcrumb';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar/Navbar';
+import Footer from '../components/Footer/Footer';
+import { toast } from 'react-toastify';
+
 // Simple icon components to replace FontAwesome
 const SpinnerIcon = () => <div className="spinner-border spinner-border-sm" role="status"><span className="visually-hidden">Loading...</span></div>;
 const CheckIcon = () => <span>✅</span>;
 const WarningIcon = () => <span>⚠️</span>;
 const CreditCardIcon = () => <span>💳</span>;
 const ShieldIcon = () => <span>🛡️</span>;
-const WifiIcon = () => <span>📶</span>;
 const LockIcon = () => <span>🔒</span>;
-import CheckoutService from '../services/CheckoutService';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar/Navbar';
-import Footer from '../components/Footer/Footer';
 
 const Checkout = () => {
   const { t } = useTranslation();
-  const { cart, cartSummary, loading: cartLoading, error: cartError, clearCart } = useCart();
+  const { cartItems, cartSubtotal, cartTax, cartShipping, cartTotal, loading: cartLoading, error: cartError, clearCart } = useCart();
   const { isAuthenticated, user } = useAuth();
+  const { createOrder, isProcessingOrder } = useOrders();
   const navigate = useNavigate();
 
   // Check authentication status
@@ -29,8 +31,7 @@ const Checkout = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Extract cart items from the cart object
-  const cartItems = cart?.items || [];
+  // Use cartItems directly from context
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -140,63 +141,61 @@ const Checkout = () => {
     setOrderError(null);
 
     try {
-      // Step 1: Save address
-      const addressPayload = {
-        billing: {
+      // Prepare order data
+      const orderData = {
+        shipping_address: {
           first_name: formData.firstName,
           last_name: formData.lastName,
           email: formData.email,
-          address1: formData.address,
+          address: formData.address,
           city: formData.city,
-          postcode: formData.postalCode,
+          postal_code: formData.postalCode,
           phone: formData.phone,
-          country: 'SA', // Default to Saudi Arabia
-          state: formData.state || '',
-          company_name: formData.companyName || '',
-          address2: formData.address2 || '',
-          use_for_shipping: true
-        }
+          country: 'SA'
+        },
+        billing_address: {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          postal_code: formData.postalCode,
+          phone: formData.phone,
+          country: 'SA'
+        },
+        payment_method: formData.paymentMethod,
+        items: cartItems.map(item => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+          price: item.product?.current_price || item.product?.price || item.price
+        }))
       };
 
-      await CheckoutService.saveAddress(addressPayload);
-
-      // Step 2: Check minimum order
-      const minimumOrderCheck = await CheckoutService.checkMinimumOrder();
-      if (!minimumOrderCheck.success) {
-        setOrderError(minimumOrderCheck.message || t('minimumOrderNotMet'));
-        setOrderSubmitting(false);
-        return;
-      }
-
-      // Step 3: Save payment method
-      const paymentPayload = {
-        payment: {
-          method: formData.paymentMethod
-        }
-      };
-
+      // Add payment details if credit card
       if (formData.paymentMethod === 'credit_card') {
-        paymentPayload.payment.card_number = formData.cardNumber.replace(/\s/g, '');
-        paymentPayload.payment.card_holder_name = formData.cardName;
-        paymentPayload.payment.expiry_date = formData.expiryDate;
-        paymentPayload.payment.cvv = formData.cvv;
+        orderData.payment_details = {
+          card_number: formData.cardNumber.replace(/\s/g, ''),
+          card_holder_name: formData.cardName,
+          expiry_date: formData.expiryDate,
+          cvv: formData.cvv
+        };
       }
 
-      await CheckoutService.savePayment(paymentPayload);
+      // Create the order
+      const result = await createOrder(orderData);
 
-      // Step 4: Submit the order
-      const response = await CheckoutService.submitOrder();
+      if (result.success) {
+        // Clear the cart after successful order
+        await clearCart();
 
-      // If we get here, the order was successful
-      setOrderSuccess(true);
+        // Show success message
+        toast.success(t('orderCreatedSuccessfully') || 'تم إنشاء الطلب بنجاح');
 
-      // Clear the cart after successful order
-      await clearCart();
-
-      // Redirect to orders page after short delay
-      setTimeout(() => {
-        window.location.href = '/orders';
-      }, 3000);
+        // Redirect to order confirmation page
+        navigate(`/order-confirmation/${result.order.id}`);
+      } else {
+        setOrderError(result.error || t('checkoutError'));
+      }
 
     } catch (err) {
       if (!navigator.onLine) {
@@ -217,16 +216,17 @@ const Checkout = () => {
     return (
       <>
         <Navbar />
+        <Breadcrumb items={breadcrumbItems} />
         <div className="container py-5">
           <div className="auth-required-message text-center py-5">
-            <FontAwesomeIcon icon={faLock} size="3x" className="mb-3 text-warning" />
-            <h2>{t('authenticationRequired')}</h2>
-            <p className="mb-4">{t('pleaseLoginToCheckout')}</p>
+            <LockIcon />
+            <h2 className="mt-3">{t('authenticationRequired') || 'مطلوب تسجيل الدخول'}</h2>
+            <p className="mb-4">{t('pleaseLoginToCheckout') || 'يرجى تسجيل الدخول لإتمام عملية الشراء'}</p>
             <button
               className="btn btn-primary"
               onClick={() => navigate('/login')}
             >
-              {t('goToLogin')}
+              {t('goToLogin') || 'تسجيل الدخول'}
             </button>
           </div>
         </div>
@@ -239,41 +239,43 @@ const Checkout = () => {
   if (orderSuccess) {
     return (
       <>
+        <Navbar />
         <Breadcrumb items={breadcrumbItems} />
         <div className="container py-5">
           <div className="row justify-content-center">
             <div className="col-md-8">
               <div className="card border-0 shadow-sm">
                 <div className="card-body text-center p-5">
-                  <FontAwesomeIcon icon={faCheckCircle} className="text-success mb-4" size="4x" />
-                  <h2 className="mb-4">{t('orderSuccess')}</h2>
-                  <p className="mb-4">{t('orderSuccessMessage')}</p>
-                  <a href="/" className="btn btn-primary">{t('continueShopping')}</a>
+                  <CheckIcon />
+                  <h2 className="mb-4 mt-3">{t('orderSuccess') || 'تم إنشاء الطلب بنجاح'}</h2>
+                  <p className="mb-4">{t('orderSuccessMessage') || 'شكراً لك! تم استلام طلبك وسيتم معالجته قريباً.'}</p>
+                  <a href="/" className="btn btn-primary">{t('continueShopping') || 'متابعة التسوق'}</a>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <Footer />
       </>
     );
   }
 
   return (
     <>
+      <Navbar />
       <Breadcrumb items={breadcrumbItems} />
       <div className="container py-5">
         <h1 className="mb-4">{t('checkout')}</h1>
 
-        {error && (
+        {cartError && (
           <div className="alert alert-danger mb-4">
-            {error}
+            {cartError}
           </div>
         )}
 
         {orderError && (
           <div className="alert alert-danger mb-4">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="me-2" />
-            {orderError}
+            <WarningIcon /> {orderError}
           </div>
         )}
 
@@ -407,8 +409,7 @@ const Checkout = () => {
                         onChange={handleInputChange}
                       />
                       <label className="form-check-label" htmlFor="creditCard">
-                        <FontAwesomeIcon icon={faCreditCard} className="me-2" />
-                        {t('creditCard')}
+                        <CreditCardIcon /> {t('creditCard') || 'بطاقة ائتمان'}
                       </label>
                     </div>
 
@@ -497,8 +498,8 @@ const Checkout = () => {
                         </div>
 
                         <div className="d-flex align-items-center mt-2">
-                          <FontAwesomeIcon icon={faShield} className="text-success me-2" />
-                          <small className="text-muted">{t('securePaymentMessage')}</small>
+                          <ShieldIcon />
+                          <small className="text-muted ms-2">{t('securePaymentMessage') || 'دفع آمن ومحمي'}</small>
                         </div>
                       </div>
                     </div>
@@ -508,15 +509,15 @@ const Checkout = () => {
                     <button
                       type="submit"
                       className="btn btn-primary btn-lg py-3"
-                      disabled={orderSubmitting || loading || !cartItems.length}
+                      disabled={orderSubmitting || isProcessingOrder || cartLoading || !cartItems.length}
                     >
-                      {orderSubmitting ? (
+                      {(orderSubmitting || isProcessingOrder) ? (
                         <>
-                          <FontAwesomeIcon icon={faSpinner} spin className="me-2" />
-                          {t('processing')}
+                          <SpinnerIcon />
+                          <span className="ms-2">{t('processing') || 'جاري المعالجة...'}</span>
                         </>
                       ) : (
-                        t('placeOrder')
+                        t('placeOrder') || 'تأكيد الطلب'
                       )}
                     </button>
                   </div>
@@ -531,9 +532,9 @@ const Checkout = () => {
               <div className="card-body">
                 <h3 className="mb-4">{t('orderSummary')}</h3>
 
-                {loading ? (
+                {cartLoading ? (
                   <div className="text-center py-4">
-                    <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+                    <SpinnerIcon />
                   </div>
                 ) : (
                   <>
@@ -545,8 +546,8 @@ const Checkout = () => {
                               <div className="flex-shrink-0">
                                 <div className="product-thumbnail">
                                   <img
-                                    src={item.image || '/assets/images/product_1.png'}
-                                    alt={item.name}
+                                    src={item.product?.main_image?.medium_url || item.image || '/assets/images/placeholder-product.jpg'}
+                                    alt={item.product?.name || item.name}
                                     width="50"
                                     height="50"
                                     className="rounded"
@@ -554,13 +555,13 @@ const Checkout = () => {
                                 </div>
                               </div>
                               <div className="flex-grow-1 ms-3">
-                                <h6 className="mb-0">{item.name}</h6>
+                                <h6 className="mb-0">{item.product?.name || item.name}</h6>
                                 <div className="d-flex justify-content-between align-items-center mt-1">
                                   <small className="text-muted">
-                                    {t('quantity')}: {item.quantity}
+                                    {t('quantity') || 'الكمية'}: {item.quantity}
                                   </small>
                                   <span className="fw-bold">
-                                    {(item.price * item.quantity).toFixed(2)}
+                                    {((item.product?.current_price || item.product?.price || item.price || 0) * item.quantity).toFixed(2)}
                                     <img
                                       src="/assets/images/sar.svg"
                                       className="price-symbol-img"
@@ -576,9 +577,9 @@ const Checkout = () => {
                         <hr />
 
                         <div className="d-flex justify-content-between mb-2">
-                          <span>{t('subtotal')}</span>
+                          <span>{t('subtotal') || 'المجموع الفرعي'}</span>
                           <span>
-                            {cartSummary.subtotal?.toFixed(2) || '0.00'}
+                            {cartSubtotal?.toFixed(2) || '0.00'}
                             <img
                               src="/assets/images/sar.svg"
                               className="price-symbol-img"
@@ -588,9 +589,9 @@ const Checkout = () => {
                         </div>
 
                         <div className="d-flex justify-content-between mb-2">
-                          <span>{t('shipping')}</span>
+                          <span>{t('shipping') || 'الشحن'}</span>
                           <span>
-                            {cartSummary.shipping?.toFixed(2) || '0.00'}
+                            {cartShipping?.toFixed(2) || '0.00'}
                             <img
                               src="/assets/images/sar.svg"
                               className="price-symbol-img"
@@ -600,9 +601,9 @@ const Checkout = () => {
                         </div>
 
                         <div className="d-flex justify-content-between mb-2">
-                          <span>{t('tax')}</span>
+                          <span>{t('tax') || 'الضريبة'}</span>
                           <span>
-                            {cartSummary.tax?.toFixed(2) || '0.00'}
+                            {cartTax?.toFixed(2) || '0.00'}
                             <img
                               src="/assets/images/sar.svg"
                               className="price-symbol-img"
@@ -614,9 +615,9 @@ const Checkout = () => {
                         <hr />
 
                         <div className="d-flex justify-content-between mb-0">
-                          <span className="fw-bold">{t('total')}</span>
+                          <span className="fw-bold">{t('total') || 'الإجمالي'}</span>
                           <span className="total-price fw-bold">
-                            {cartSummary.total?.toFixed(2) || '0.00'}
+                            {cartTotal?.toFixed(2) || '0.00'}
                             <img
                               src="/assets/images/sar.svg"
                               className="price-symbol-img"
@@ -637,6 +638,7 @@ const Checkout = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };

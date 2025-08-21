@@ -7,9 +7,11 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\LandscapeController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ShopController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +52,8 @@ Route::group([], function () {
     Route::post('/cart/add', [CartController::class, 'add']);
     Route::post('/cart/update', [CartController::class, 'update']);
     Route::post('/cart/remove', [CartController::class, 'remove']);
+    Route::post('/cart/clear', [CartController::class, 'clear']);
+    Route::post('/cart/apply-discount', [CartController::class, 'applyDiscount']);
 
     // Checkout routes
     Route::get('/checkout', [CheckoutController::class, 'index']);
@@ -72,15 +76,38 @@ Route::group([], function () {
     Route::get('/about', [AboutController::class, 'index']);
     Route::post('/contact', [AboutController::class, 'contact']);
 
+    // Order routes (public)
+    Route::get('/orders/tracking/{orderNumber}', [OrderController::class, 'tracking']);
+
+    // Payment routes (public)
+    Route::get('/payment/methods', [PaymentController::class, 'methods']);
+
     // Protected user routes (require authentication)
-    // Route::middleware('auth:sanctum')->group(function () {
-    //     Route::get('/profile', [UserController::class, 'profile']);
-    //     Route::put('/profile', [UserController::class, 'updateProfile']);
-    //     Route::post('/profile/change-password', [UserController::class, 'changePassword']);
-    //     Route::get('/profile/orders', [UserController::class, 'getOrders']);
-    //     Route::get('/profile/favorites', [UserController::class, 'getFavorites']);
-    //     Route::delete('/profile/delete-account', [UserController::class, 'deleteAccount']);
-    // });
+    Route::middleware('auth:sanctum')->group(function () {
+        // User Profile routes
+        Route::get('/profile', [UserProfileController::class, 'show']);
+        Route::put('/profile', [UserProfileController::class, 'update']);
+        Route::post('/profile/change-password', [UserProfileController::class, 'changePassword']);
+        Route::get('/profile/favorites', [UserProfileController::class, 'favorites']);
+        Route::delete('/profile/delete-account', [UserProfileController::class, 'deleteAccount']);
+
+        // Address management routes
+        Route::get('/profile/addresses', [UserProfileController::class, 'addresses']);
+        Route::post('/profile/addresses', [UserProfileController::class, 'addAddress']);
+        Route::put('/profile/addresses/{addressId}', [UserProfileController::class, 'updateAddress']);
+        Route::delete('/profile/addresses/{addressId}', [UserProfileController::class, 'deleteAddress']);
+
+        // Order routes (protected)
+        Route::get('/orders', [OrderController::class, 'index']);
+        Route::post('/orders', [OrderController::class, 'store']);
+        Route::get('/orders/{id}', [OrderController::class, 'show']);
+        Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel']);
+
+        // Payment routes (protected)
+        Route::post('/payments/process', [PaymentController::class, 'process']);
+        Route::get('/payments/status/{orderId}', [PaymentController::class, 'status']);
+        Route::post('/payments/{paymentId}/refund', [PaymentController::class, 'refund']);
+    });
 
     // Route::post('/message', function (Request $request) {
     //     $number = $request->input('number'); // Customer's approved WhatsApp number

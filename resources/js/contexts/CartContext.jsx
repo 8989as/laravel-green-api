@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { useAuth } from './AuthContext.jsx';
+import { useUser } from './UserContext.jsx';
+import { useAuth } from './AuthContext.jsx'; // Keep for backward compatibility
 
 const CartContext = createContext();
 
@@ -15,9 +16,14 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
     const [cartCount, setCartCount] = useState(0);
+    const [cartTotal, setCartTotal] = useState(0);
+    const [cartSubtotal, setCartSubtotal] = useState(0);
+    const [cartTax, setCartTax] = useState(0);
+    const [cartShipping, setCartShipping] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const { isAuthenticated, token } = useAuth();
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const { isAuthenticated, token } = useUser();
 
     // Load cart items when user is authenticated
     useEffect(() => {
@@ -30,6 +36,25 @@ export const CartProvider = ({ children }) => {
         }
     }, [isAuthenticated, token]);
 
+    // Calculate cart totals
+    const calculateCartTotals = (items) => {
+        const subtotal = items.reduce((total, item) => {
+            const price = item.product?.current_price || item.product?.price || 0;
+            return total + (price * item.quantity);
+        }, 0);
+
+        const tax = subtotal * 0.15; // 15% tax rate
+        const shipping = subtotal > 100 ? 0 : 25; // Free shipping over 100
+        const total = subtotal + tax + shipping;
+
+        setCartSubtotal(subtotal);
+        setCartTax(tax);
+        setCartShipping(shipping);
+        setCartTotal(total);
+
+        return { subtotal, tax, shipping, total };
+    };
+
     // Load cart from API
     const loadCart = async () => {
         if (!isAuthenticated) return;
@@ -40,6 +65,7 @@ export const CartProvider = ({ children }) => {
             const items = response.data.items || [];
             setCartItems(items);
             setCartCount(items.reduce((total, item) => total + item.quantity, 0));
+            calculateCartTotals(items);
         } catch (err) {
             console.error('Failed to load cart:', err);
             setError('Failed to load cart');
@@ -147,25 +173,78 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Get cart total
+    // Get cart total (legacy method for backward compatibility)
     const getCartTotal = () => {
-        return cartItems.reduce((total, item) => {
-            const price = item.product?.current_price || item.product?.price || 0;
-            return total + (price * item.quantity);
-        }, 0);
+        return cartTotal;
+    };
+
+    // Toggle cart sidebar
+    const toggleCart = () => {
+        setIsCartOpen(!isCartOpen);
+    };
+
+    // Open cart sidebar
+    const openCart = () => {
+        setIsCartOpen(true);
+    };
+
+    // Close cart sidebar
+    const closeCart = () => {
+        setIsCartOpen(false);
+    };
+
+    // Check if product is in cart
+    const isInCart = (productId) => {
+        return cartItems.some(item => item.product_id === productId);
+    };
+
+    // Get cart item by product ID
+    const getCartItem = (productId) => {
+        return cartItems.find(item => item.product_id === productId);
+    };
+
+    // Get cart summary
+    const getCartSummary = () => {
+        return {
+            itemCount: cartCount,
+            subtotal: cartSubtotal,
+            tax: cartTax,
+            shipping: cartShipping,
+            total: cartTotal,
+            isEmpty: cartItems.length === 0
+        };
     };
 
     const value = {
+        // State
         cartItems,
         cartCount,
+        cartTotal,
+        cartSubtotal,
+        cartTax,
+        cartShipping,
         loading,
         error,
+        isCartOpen,
+
+        // Actions
         addToCart,
         updateCartItem,
         removeFromCart,
         clearCart,
         loadCart,
-        getCartTotal
+
+        // UI Actions
+        toggleCart,
+        openCart,
+        closeCart,
+
+        // Utility functions
+        getCartTotal,
+        isInCart,
+        getCartItem,
+        getCartSummary,
+        calculateCartTotals
     };
 
     return (
