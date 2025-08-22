@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 import AuthModal from './AuthModal';
 import './Auth.css';
@@ -35,8 +33,7 @@ const NavAuthButtons = () => {
           onClick={handleAuthButtonClick}
           aria-label={isAuthenticated ? t('accountMenu') : t('signIn')}
         >
-          {/* <FontAwesomeIcon icon={faUser} className="icon-vector" /> */}
-          <img src="assets/images/navProfile.svg" alt="Profile" />
+          {/* <img src="assets/images/navProfile.svg" alt="Profile" /> */}
         </button>
         
         {/* User dropdown menu when authenticated */}

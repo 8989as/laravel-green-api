@@ -101,10 +101,10 @@ const Footer = () => {
                 {isRTL ? 'تابعونا على' : 'Follow Us'}
               </h4>
               <div className="social-links d-flex justify-content-center justify-content-md-start gap-3">
-                <a href="#" className="social-link" aria-label="youtube"><i className="fab fa-youtube"></i></a>
-                <a href="#" className="social-link" aria-label="twitter"><i className="fab fa-twitter"></i></a>
-                <a href="#" className="social-link" aria-label="instagram"><i className="fab fa-instagram"></i></a>
-                <a href="#" className="social-link" aria-label="facebook"><i className="fab fa-facebook-f"></i></a>
+                <a href="#" className="social-link" aria-label="youtube">📺</a>
+                <a href="#" className="social-link" aria-label="twitter">🐦</a>
+                <a href="#" className="social-link" aria-label="instagram">📷</a>
+                <a href="#" className="social-link" aria-label="facebook">👥</a>
               </div>
             </div>
 

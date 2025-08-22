@@ -2,7 +2,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use Inertia\Inertia;
 
 class HomeController extends Controller
 {
@@ -51,7 +50,7 @@ class HomeController extends Controller
 
         $categorz = $categorz ?: [];
 
-        return Inertia::render('Home', [
+        return response()->json([
             'featuredProducts' => $products,
             'categorz'       => $categorz,
         ]);
@@ -59,24 +58,24 @@ class HomeController extends Controller
 
     public function about()
     {
-        return Inertia::render('About');
+        return response()->json(['message' => 'About page']);
     }
 
     public function contact()
     {
-        return Inertia::render('Contact');
+        return response()->json(['message' => 'Contact page']);
     }
 
     public function portfolio()
     {
-        return Inertia::render('Portfolio');
+        return response()->json(['message' => 'Portfolio page']);
     }
     public function events()
     {
-        return Inertia::render('EventsPage');
+        return response()->json(['message' => 'Events page']);
     }
     public function landscape()
     {
-        return Inertia::render('Landscape');
+        return response()->json(['message' => 'Landscape page']);
     }
 }

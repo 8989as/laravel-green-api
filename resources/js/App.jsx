@@ -15,7 +15,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
-import ProductDetails from './pages/ProductDetails';
+import ProductDetailsClean from './pages/ProductDetailsClean';
 import EventsPage from './pages/EventsPage';
 import OrderConfirmation from './pages/OrderConfirmation';
 
@@ -58,7 +58,7 @@ function App() {
                       {/* Public Routes */}
                       <Route path="/" element={<Home />} />
                       <Route path="/products" element={<AllProducts />} />
-                      <Route path="/product/:id" element={<ProductDetails />} />
+                      <Route path="/product/:id" element={<ProductDetailsClean />} />
                       <Route path="/landscape" element={<Landscape />} />
                       <Route path="/about" element={<About />} />
                       <Route path="/contact" element={<Contact />} />

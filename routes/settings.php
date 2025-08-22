@@ -1,5 +1,8 @@
 <?php
 
+// Settings routes disabled - using API-based approach instead
+
+/*
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -19,3 +22,4 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
 });
+*/

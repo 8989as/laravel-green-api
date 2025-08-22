@@ -1,5 +1,9 @@
 <?php
 
+// Auth routes disabled - using API-based authentication instead
+// The Inertia-based auth controllers have been removed
+
+/*
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
@@ -54,3 +58,4 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+*/

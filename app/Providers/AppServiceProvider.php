@@ -19,9 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Share categories globally with all Inertia responses
-        \Inertia\Inertia::share('categories', function () {
-            return \App\Models\Category::select('id', 'category_ar', 'category_en')->get();
-        });
+        // Categories can be shared via API endpoints instead
     }
 }
