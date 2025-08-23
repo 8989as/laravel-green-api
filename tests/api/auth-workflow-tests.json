@@ -1,0 +1,521 @@
+{
+    "auth_workflow_tests": {
+        "description": "Complete test suite for Twilio-based WhatsApp OTP authentication workflow",
+        "base_url": "http://localhost:8000/api",
+        "test_scenarios": {
+            "1_send_otp_tests": {
+                "description": "Test OTP sending functionality",
+                "endpoint": "POST /api/send-otp",
+                "test_cases": [
+                    {
+                        "name": "Valid phone number - US format",
+                        "request": {
+                            "phone_number": "+1234567890"
+                        },
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "message": "OTP sent to WhatsApp",
+                                "environment": "sandbox"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Valid phone number - International format",
+                        "request": {
+                            "phone_number": "+201555545417"
+                        },
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "message": "OTP sent to WhatsApp",
+                                "environment": "sandbox"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Phone number without country code",
+                        "request": {
+                            "phone_number": "1234567890"
+                        },
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "message": "OTP sent to WhatsApp",
+                                "environment": "sandbox"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Phone number with formatting",
+                        "request": {
+                            "phone_number": "(123) 456-7890"
+                        },
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "message": "OTP sent to WhatsApp",
+                                "environment": "sandbox"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Missing phone number",
+                        "request": {},
+                        "expected_response": {
+                            "status": 422,
+                            "body": {
+                                "error": {
+                                    "phone_number": [
+                                        "The phone number field is required."
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Empty phone number",
+                        "request": {
+                            "phone_number": ""
+                        },
+                        "expected_response": {
+                            "status": 422,
+                            "body": {
+                                "error": {
+                                    "phone_number": [
+                                        "The phone number field is required."
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "2_registration_tests": {
+                "description": "Test user registration with OTP verification",
+                "endpoint": "POST /api/register",
+                "prerequisites": "Must call /api/send-otp first to get OTP",
+                "test_cases": [
+                    {
+                        "name": "Successful registration - new user",
+                        "setup": {
+                            "description": "Send OTP first, then use the cached OTP for registration",
+                            "send_otp_request": {
+                                "phone_number": "+1234567890"
+                            }
+                        },
+                        "request": {
+                            "name": "John Doe",
+                            "phone_number": "+1234567890",
+                            "otp": "123456"
+                        },
+                        "note": "Replace '123456' with actual OTP from cache or logs",
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "message": "Registration successful",
+                                "token": "jwt_token_string",
+                                "customer": {
+                                    "id": 1,
+                                    "name": "John Doe",
+                                    "phone_number": "+1234567890",
+                                    "created_at": "2025-01-XX...",
+                                    "updated_at": "2025-01-XX..."
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Registration with Arabic name",
+                        "setup": {
+                            "send_otp_request": {
+                                "phone_number": "+201555545417"
+                            }
+                        },
+                        "request": {
+                            "name": "أحمد محمد",
+                            "phone_number": "+201555545417",
+                            "otp": "123456"
+                        },
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "message": "Registration successful",
+                                "token": "jwt_token_string",
+                                "customer": {
+                                    "name": "أحمد محمد",
+                                    "phone_number": "+201555545417"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Registration with invalid OTP",
+                        "setup": {
+                            "send_otp_request": {
+                                "phone_number": "+1234567891"
+                            }
+                        },
+                        "request": {
+                            "name": "Jane Doe",
+                            "phone_number": "+1234567891",
+                            "otp": "000000"
+                        },
+                        "expected_response": {
+                            "status": 401,
+                            "body": {
+                                "error": "Invalid or expired OTP"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Registration with expired OTP",
+                        "setup": {
+                            "description": "Send OTP and wait 6+ minutes before registration",
+                            "send_otp_request": {
+                                "phone_number": "+1234567892"
+                            }
+                        },
+                        "request": {
+                            "name": "Expired User",
+                            "phone_number": "+1234567892",
+                            "otp": "123456"
+                        },
+                        "expected_response": {
+                            "status": 401,
+                            "body": {
+                                "error": "Invalid or expired OTP"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Duplicate registration",
+                        "setup": {
+                            "description": "Register user first, then try to register again",
+                            "first_registration": {
+                                "name": "Existing User",
+                                "phone_number": "+1234567893",
+                                "otp": "valid_otp"
+                            }
+                        },
+                        "request": {
+                            "name": "Another Name",
+                            "phone_number": "+1234567893",
+                            "otp": "valid_otp"
+                        },
+                        "expected_response": {
+                            "status": 422,
+                            "body": {
+                                "error": "Phone number already registered. Please login instead."
+                            }
+                        }
+                    },
+                    {
+                        "name": "Missing required fields",
+                        "request": {
+                            "phone_number": "+1234567894"
+                        },
+                        "expected_response": {
+                            "status": 422,
+                            "body": {
+                                "error": {
+                                    "name": [
+                                        "The name field is required."
+                                    ],
+                                    "otp": [
+                                        "The otp field is required."
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "3_login_tests": {
+                "description": "Test user login with OTP verification",
+                "endpoint": "POST /api/login",
+                "prerequisites": "User must be registered first",
+                "test_cases": [
+                    {
+                        "name": "Successful login - existing user",
+                        "setup": {
+                            "description": "Register user first, then send OTP for login",
+                            "registration": {
+                                "name": "Login Test User",
+                                "phone_number": "+1234567895",
+                                "otp": "valid_otp"
+                            },
+                            "send_otp_request": {
+                                "phone_number": "+1234567895"
+                            }
+                        },
+                        "request": {
+                            "phone_number": "+1234567895",
+                            "otp": "123456"
+                        },
+                        "note": "Replace '123456' with actual OTP from cache or logs",
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "message": "Login successful",
+                                "token": "jwt_token_string",
+                                "customer": {
+                                    "id": 1,
+                                    "name": "Login Test User",
+                                    "phone_number": "+1234567895"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "Login with invalid OTP",
+                        "setup": {
+                            "send_otp_request": {
+                                "phone_number": "+1234567895"
+                            }
+                        },
+                        "request": {
+                            "phone_number": "+1234567895",
+                            "otp": "000000"
+                        },
+                        "expected_response": {
+                            "status": 401,
+                            "body": {
+                                "error": "Invalid or expired OTP"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Login with non-existent user",
+                        "setup": {
+                            "send_otp_request": {
+                                "phone_number": "+1234567896"
+                            }
+                        },
+                        "request": {
+                            "phone_number": "+1234567896",
+                            "otp": "123456"
+                        },
+                        "expected_response": {
+                            "status": 404,
+                            "body": {
+                                "error": "Phone number not registered. Please register first."
+                            }
+                        }
+                    },
+                    {
+                        "name": "Login without sending OTP first",
+                        "request": {
+                            "phone_number": "+1234567897",
+                            "otp": "123456"
+                        },
+                        "expected_response": {
+                            "status": 401,
+                            "body": {
+                                "error": "Invalid or expired OTP"
+                            }
+                        }
+                    },
+                    {
+                        "name": "Missing required fields",
+                        "request": {
+                            "phone_number": "+1234567898"
+                        },
+                        "expected_response": {
+                            "status": 422,
+                            "body": {
+                                "error": {
+                                    "otp": [
+                                        "The otp field is required."
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "4_complete_workflow_tests": {
+                "description": "End-to-end workflow tests",
+                "test_cases": [
+                    {
+                        "name": "Complete registration workflow",
+                        "steps": [
+                            {
+                                "step": 1,
+                                "description": "Send OTP for registration",
+                                "endpoint": "POST /api/send-otp",
+                                "request": {
+                                    "phone_number": "+1555123456"
+                                },
+                                "expected_response": {
+                                    "status": 200,
+                                    "body": {
+                                        "message": "OTP sent to WhatsApp"
+                                    }
+                                }
+                            },
+                            {
+                                "step": 2,
+                                "description": "Register with received OTP",
+                                "endpoint": "POST /api/register",
+                                "request": {
+                                    "name": "Workflow Test User",
+                                    "phone_number": "+1555123456",
+                                    "otp": "{{otp_from_step_1}}"
+                                },
+                                "expected_response": {
+                                    "status": 200,
+                                    "body": {
+                                        "message": "Registration successful",
+                                        "token": "{{jwt_token}}",
+                                        "customer": {
+                                            "name": "Workflow Test User",
+                                            "phone_number": "+1555123456"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Complete login workflow",
+                        "prerequisites": "User must be registered first",
+                        "steps": [
+                            {
+                                "step": 1,
+                                "description": "Send OTP for login",
+                                "endpoint": "POST /api/send-otp",
+                                "request": {
+                                    "phone_number": "+1555123456"
+                                },
+                                "expected_response": {
+                                    "status": 200,
+                                    "body": {
+                                        "message": "OTP sent to WhatsApp"
+                                    }
+                                }
+                            },
+                            {
+                                "step": 2,
+                                "description": "Login with received OTP",
+                                "endpoint": "POST /api/login",
+                                "request": {
+                                    "phone_number": "+1555123456",
+                                    "otp": "{{otp_from_step_1}}"
+                                },
+                                "expected_response": {
+                                    "status": 200,
+                                    "body": {
+                                        "message": "Login successful",
+                                        "token": "{{jwt_token}}",
+                                        "customer": {
+                                            "name": "Workflow Test User",
+                                            "phone_number": "+1555123456"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "5_edge_case_tests": {
+                "description": "Edge cases and error scenarios",
+                "test_cases": [
+                    {
+                        "name": "Multiple OTP requests for same number",
+                        "description": "Test rate limiting and OTP replacement",
+                        "steps": [
+                            {
+                                "step": 1,
+                                "endpoint": "POST /api/send-otp",
+                                "request": {
+                                    "phone_number": "+1555999888"
+                                }
+                            },
+                            {
+                                "step": 2,
+                                "description": "Send another OTP immediately",
+                                "endpoint": "POST /api/send-otp",
+                                "request": {
+                                    "phone_number": "+1555999888"
+                                },
+                                "note": "Should replace previous OTP"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "Phone number normalization test",
+                        "description": "Test various phone number formats",
+                        "test_numbers": [
+                            "1234567890",
+                            "+1234567890",
+                            "123-456-7890",
+                            "(123) 456-7890",
+                            "123 456 7890",
+                            "+1 (123) 456-7890"
+                        ],
+                        "note": "All should normalize to +11234567890"
+                    },
+                    {
+                        "name": "Special characters in name",
+                        "setup": {
+                            "send_otp_request": {
+                                "phone_number": "+1555888777"
+                            }
+                        },
+                        "request": {
+                            "name": "José María O'Connor-Smith",
+                            "phone_number": "+1555888777",
+                            "otp": "valid_otp"
+                        },
+                        "expected_response": {
+                            "status": 200,
+                            "body": {
+                                "customer": {
+                                    "name": "José María O'Connor-Smith"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "testing_instructions": {
+            "setup": [
+                "1. Ensure Laravel application is running",
+                "2. Configure Twilio credentials in .env file",
+                "3. Set TWILIO_ENVIRONMENT=sandbox for testing",
+                "4. Clear application cache: php artisan config:clear"
+            ],
+            "otp_retrieval": {
+                "sandbox_mode": [
+                    "Check Laravel logs for OTP: tail -f storage/logs/laravel.log",
+                    "Or check cache directly in tinker: Cache::get('whatsapp_otp_1234567890')",
+                    "OTP expires after 5 minutes"
+                ],
+                "production_mode": [
+                    "OTP will be sent to actual WhatsApp number",
+                    "Check WhatsApp messages on the target device"
+                ]
+            },
+            "tools": [
+                "Use Postman, Insomnia, or curl for API testing",
+                "Use browser dev tools for frontend testing",
+                "Monitor Laravel logs for debugging"
+            ],
+            "validation": [
+                "Verify OTP is cleared from cache after successful verification",
+                "Check JWT token is valid and properly formatted",
+                "Confirm customer record is created in database",
+                "Test token authentication on protected routes"
+            ]
+        },
+        "curl_examples": {
+            "send_otp": "curl -X POST http://localhost:8000/api/send-otp -H 'Content-Type: application/json' -d '{\"phone_number\": \"+1234567890\"}'",
+            "register": "curl -X POST http://localhost:8000/api/register -H 'Content-Type: application/json' -d '{\"name\": \"Test User\", \"phone_number\": \"+1234567890\", \"otp\": \"123456\"}'",
+            "login": "curl -X POST http://localhost:8000/api/login -H 'Content-Type: application/json' -d '{\"phone_number\": \"+1234567890\", \"otp\": \"123456\"}'",
+            "protected_route": "curl -X GET http://localhost:8000/api/profile -H 'Authorization: Bearer YOUR_JWT_TOKEN'"
+        }
+    }
+}

@@ -11,6 +11,13 @@ return [
         'sandbox_from' => env('VONAGE_SANDBOX_FROM'),
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_ACCOUNT_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+        'environment' => env('TWILIO_ENVIRONMENT', 'sandbox'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

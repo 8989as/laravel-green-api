@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
-use App\Services\VonageService;
+use App\Services\TwilioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    protected $vonageService;
+    protected $twilioService;
 
-    public function __construct(VonageService $vonageService)
+    public function __construct(TwilioService $twilioService)
     {
-        $this->vonageService = $vonageService;
+        $this->twilioService = $twilioService;
     }
 
     /**
@@ -71,25 +71,16 @@ class AuthController extends Controller
             return response()->json(['error' => 'Phone number already registered. Please login instead.'], 422);
         }
 
-        // Normalize phone number for cache lookup (without +)
+        // Normalize phone number for TwilioService verification
         $phoneNumber = ltrim($normalizedPhone, '+');
 
-        // Verify OTP
-        $cachedOtp = Cache::get('otp_'.$phoneNumber);
-        \Log::info('OTP verification', [
-            'original_phone' => $request->phone_number,
-            'normalized_phone' => $phoneNumber,
-            'provided_otp' => $request->otp,
-            'cached_otp' => $cachedOtp,
-            'cache_key' => 'otp_'.$phoneNumber,
-        ]);
-
-        if (! $cachedOtp || $cachedOtp != $request->otp) {
+        // Verify OTP using TwilioService
+        $isValidOtp = $this->twilioService->verifyOTP($phoneNumber, $request->otp);
+        if (! $isValidOtp) {
             \Log::error('OTP verification failed', [
                 'original_phone' => $request->phone_number,
                 'normalized_phone' => $phoneNumber,
                 'provided_otp' => $request->otp,
-                'cached_otp' => $cachedOtp,
             ]);
 
             return response()->json(['error' => 'Invalid or expired OTP'], 401);
@@ -109,7 +100,7 @@ class AuthController extends Controller
             ]);
 
             $token = $customer->createToken('auth_token')->plainTextToken;
-            Cache::forget('otp_'.$phoneNumber);
+            // OTP is automatically cleared by TwilioService after successful verification
 
             return response()->json([
                 'message' => 'Registration successful',
@@ -150,17 +141,16 @@ class AuthController extends Controller
             return response()->json(['error' => 'Phone number not registered. Please register first.'], 404);
         }
 
-        // Normalize phone number for cache lookup (without +)
+        // Normalize phone number for TwilioService verification
         $phoneNumber = ltrim($normalizedPhone, '+');
 
-        // Verify OTP
-        $cachedOtp = Cache::get('otp_'.$phoneNumber);
-        if (! $cachedOtp || $cachedOtp != $request->otp) {
+        // Verify OTP using TwilioService
+        $isValidOtp = $this->twilioService->verifyOTP($phoneNumber, $request->otp);
+        if (! $isValidOtp) {
             return response()->json(['error' => 'Invalid or expired OTP'], 401);
         }
 
         $token = $customer->createToken('auth_token')->plainTextToken;
-        Cache::forget('otp_'.$phoneNumber);
 
         return response()->json([
             'message' => 'Login successful',
@@ -187,22 +177,16 @@ class AuthController extends Controller
         // For cache key, remove the + sign
         $phoneNumber = ltrim($normalizedPhone, '+');
 
-        $otp = random_int(100000, 999999);
-        Cache::put('otp_'.$phoneNumber, $otp, now()->addMinutes(5));
+        // Use TwilioService to generate and send OTP
+        $result = $this->twilioService->sendOtp($phoneNumber);
 
-        // Log the OTP for debugging (remove in production)
-        \Log::info('OTP generated for '.$phoneNumber.': '.$otp, [
-            'original_phone' => $request->phone_number,
-            'normalized_phone' => $normalizedPhone,
-            'cache_key' => 'otp_'.$phoneNumber,
-        ]);
-
-        $sent = $this->vonageService->sendOtp($phoneNumber, $otp);
-
-        if (! $sent) {
-            return response()->json(['error' => 'Failed to send OTP. Please try again.'], 500);
+        if ($result['status'] !== 'success') {
+            return response()->json(['error' => 'Failed to send OTP: '.$result['message']], 500);
         }
 
-        return response()->json(['message' => 'OTP sent to WhatsApp']);
+        return response()->json([
+            'message' => 'OTP sent to WhatsApp',
+            'environment' => $this->twilioService->getEnvironment(),
+        ]);
     }
 }
