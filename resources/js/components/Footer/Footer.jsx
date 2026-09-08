@@ -92,6 +92,9 @@ const Footer = () => {
                 <a href="/contact" className="footer-link">
                   {isRTL ? 'تواصل معنا' : 'Contact Us'}
                 </a>
+                <a href="/privacy-policy" className="footer-link">
+                  {isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'}
+                </a>
               </div>
             </div>
 

@@ -18,6 +18,7 @@ import Profile from './pages/Profile';
 import ProductDetailsClean from './pages/ProductDetailsClean';
 import EventsPage from './pages/EventsPage';
 import OrderConfirmation from './pages/OrderConfirmation';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Import components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -63,6 +64,7 @@ function App() {
                       <Route path="/about" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/events" element={<EventsPage />} />
+                      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/checkout" element={<Checkout />} />
