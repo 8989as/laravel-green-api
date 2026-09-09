@@ -42,7 +42,7 @@ const Footer = () => {
                   <div className="footer-contact-label mb-1">
                     {isRTL ? 'الجوال' : 'Mobile'}
                   </div>
-                  <div className="footer-contact-value">(+966) 59 494 0950</div>
+                  <div className="footer-contact-value">(+966) 594940950</div>
                 </div>
                 <div className="footer-contact-item">
                   <div className="footer-contact-label mb-1">
