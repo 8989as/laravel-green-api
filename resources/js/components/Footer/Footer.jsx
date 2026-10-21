@@ -140,7 +140,7 @@ const Footer = () => {
                     <a href="#" className="text-primary-green fw-bold"> مزرعة مسراتكو </a>
                     <span className="text-dark-green">| تصميم و برمجة </span>
                     <a href="#" className="text-primary-green fw-bold">تايجر كود</a>
-                    <span className="text-dark-green">.</span>
+                    <span className="text-dark-green"> | السجل التجاري: 7025487286</span>
                   </>
                 ) : (
                   <>
@@ -148,7 +148,7 @@ const Footer = () => {
                     <a href="#" className="text-primary-green fw-bold"> Masaratco Farm </a>
                     <span className="text-dark-green">| Designed & Developed by </span>
                     <a href="#" className="text-primary-green fw-bold">Tiger Code</a>
-                    <span className="text-dark-green">.</span>
+                    <span className="text-dark-green"> | Commercial Registration: 7025487286</span>
                   </>
                 )}
               </div>
