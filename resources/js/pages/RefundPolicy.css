@@ -1,0 +1,398 @@
+/* ============================================================
+   RefundPolicy.css
+   Styles for the Shipping & Returns page – Masaratco Farm
+   Brand: primary green #3D853C, dark green #224921, light bg #ECF3EC
+   ============================================================ */
+
+/* ── Hero Banner ──────────────────────────────────────────── */
+.refund-hero {
+  background: linear-gradient(135deg, #224921 0%, #3D853C 60%, #5aad59 100%);
+  padding: 64px 0 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+.refund-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.refund-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.refund-hero-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+.refund-hero-title {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.refund-hero-subtitle {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 1.5rem;
+}
+
+.refund-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  padding: 0.35rem 1.1rem;
+  font-size: 0.85rem;
+  font-family: 'El Messiri', sans-serif;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Content Wrapper ──────────────────────────────────────── */
+.refund-content-wrapper {
+  background-color: #f4f8f4;
+  padding: 56px 0 72px;
+}
+
+/* ── Intro Card ───────────────────────────────────────────── */
+.refund-intro-card {
+  background: #ffffff;
+  border-left: 4px solid #3D853C;
+  border-radius: 0 12px 12px 0;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 12px rgba(61,133,60,0.08);
+}
+
+[dir="rtl"] .refund-intro-card {
+  border-left: none;
+  border-right: 4px solid #3D853C;
+  border-radius: 12px 0 0 12px;
+}
+
+.refund-intro-text {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1.05rem;
+  color: #3a5a39;
+  line-height: 1.9;
+  margin: 0;
+}
+
+/* ── Section Block ────────────────────────────────────────── */
+.refund-section {
+  background: #ffffff;
+  border-radius: 16px;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 2px 16px rgba(61,133,60,0.07);
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.refund-section:hover {
+  box-shadow: 0 6px 28px rgba(61,133,60,0.14);
+  transform: translateY(-2px);
+}
+
+.refund-section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: linear-gradient(90deg, #ECF3EC 0%, #f7fbf7 100%);
+  padding: 1.1rem 1.75rem;
+  border-bottom: 1px solid #d5e8d5;
+}
+
+[dir="rtl"] .refund-section-header {
+  flex-direction: row-reverse;
+  background: linear-gradient(270deg, #ECF3EC 0%, #f7fbf7 100%);
+}
+
+.refund-section-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.refund-section-title {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #224921;
+  margin: 0;
+}
+
+.refund-section-body {
+  padding: 1.5rem 1.75rem;
+  font-family: 'El Messiri', sans-serif;
+  font-size: 0.97rem;
+  color: #3a5a39;
+  line-height: 1.85;
+}
+
+.refund-section-body p {
+  margin-bottom: 0.85rem;
+}
+
+/* ── List ─────────────────────────────────────────────────── */
+.refund-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.refund-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+[dir="rtl"] .refund-list li {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.list-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #3D853C;
+  font-weight: bold;
+}
+
+/* ── Highlight Box ────────────────────────────────────────── */
+.refund-highlight-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #ECF3EC, #f7fbf7);
+  border: 1px solid #C3D9C3;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.25rem;
+}
+
+[dir="rtl"] .refund-highlight-box {
+  flex-direction: row-reverse;
+}
+
+.highlight-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.highlight-content {
+  flex: 1;
+}
+
+.highlight-title {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.highlight-value {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #224921;
+}
+
+/* ── Coverage Box ─────────────────────────────────────────── */
+.refund-coverage-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, #3D853C, #5aad59);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem;
+  color: #ffffff;
+}
+
+[dir="rtl"] .refund-coverage-box {
+  flex-direction: row-reverse;
+}
+
+.coverage-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.coverage-text {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* ── Note Banner ──────────────────────────────────────────── */
+.refund-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 10px;
+  padding: 0.85rem 1.1rem;
+  margin-top: 1rem;
+  font-family: 'El Messiri', sans-serif;
+  font-size: 0.92rem;
+  color: #6b4c00;
+  line-height: 1.65;
+}
+
+[dir="rtl"] .refund-note {
+  flex-direction: row-reverse;
+}
+
+.note-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Contact Section ──────────────────────────────────────── */
+.refund-contact-section {
+  background: linear-gradient(135deg, #224921, #3D853C);
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  margin-top: 2.5rem;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(61,133,60,0.25);
+}
+
+.contact-section-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.contact-section-title {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+}
+
+.contact-section-text {
+  font-family: 'El Messiri', sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: rgba(255,255,255,0.9);
+}
+
+.contact-section-items {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.contact-section-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  color: #ffffff;
+  font-family: 'El Messiri', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.contact-section-item:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-2px);
+  color: #ffffff;
+}
+
+[dir="rtl"] .contact-section-item {
+  flex-direction: row-reverse;
+}
+
+.contact-item-icon {
+  font-size: 1.2rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .refund-hero {
+    padding: 44px 0 40px;
+  }
+
+  .refund-hero-title {
+    font-size: 1.75rem;
+  }
+
+  .refund-hero-icon {
+    font-size: 2.75rem;
+  }
+
+  .refund-section-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .refund-section-body {
+    padding: 1.25rem;
+  }
+
+  .refund-intro-card {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .refund-highlight-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .refund-coverage-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .refund-contact-section {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .contact-section-items {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .refund-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .refund-section-title {
+    font-size: 1.05rem;
+  }
+}

@@ -19,6 +19,7 @@ import ProductDetailsClean from './pages/ProductDetailsClean';
 import EventsPage from './pages/EventsPage';
 import OrderConfirmation from './pages/OrderConfirmation';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
 
 // Import components
 import ProtectedRoute from './components/ProtectedRoute.jsx';
@@ -65,6 +66,7 @@ function App() {
                       <Route path="/contact" element={<Contact />} />
                       <Route path="/events" element={<EventsPage />} />
                       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                      <Route path="/refund-policy" element={<RefundPolicy />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/profile" element={<Profile />} />
                       <Route path="/checkout" element={<Checkout />} />

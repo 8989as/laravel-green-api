@@ -1,0 +1,240 @@
+/* ==========================================================================
+   RTL/LTR Utilities - Bidirectional Layout Support
+   ========================================================================== */
+
+/* ==========================================================================
+   Base RTL/LTR Rules
+   ========================================================================== */
+
+[dir="rtl"] {
+  direction: rtl;
+  text-align: start;
+}
+
+[dir="ltr"] {
+  direction: ltr;
+  text-align: start;
+}
+
+/* ==========================================================================
+   Logical Properties - Preferred Approach
+   Use these modern CSS properties for automatic RTL support
+   ========================================================================== */
+
+/* Text Alignment */
+.text-start {
+  text-align: start !important;
+}
+
+.text-end {
+  text-align: end !important;
+}
+
+/* Margin Utilities with Logical Properties */
+.ms-auto { margin-inline-start: auto !important; }
+.me-auto { margin-inline-end: auto !important; }
+.mx-auto { margin-inline: auto !important; }
+
+.ms-1 { margin-inline-start: var(--spacing-xs) !important; }
+.me-1 { margin-inline-end: var(--spacing-xs) !important; }
+.ms-2 { margin-inline-start: var(--spacing-sm) !important; }
+.me-2 { margin-inline-end: var(--spacing-sm) !important; }
+.ms-3 { margin-inline-start: var(--spacing-md) !important; }
+.me-3 { margin-inline-end: var(--spacing-md) !important; }
+.ms-4 { margin-inline-start: var(--spacing-lg) !important; }
+.me-4 { margin-inline-end: var(--spacing-lg) !important; }
+
+/* Padding Utilities with Logical Properties */
+.ps-1 { padding-inline-start: var(--spacing-xs) !important; }
+.pe-1 { padding-inline-end: var(--spacing-xs) !important; }
+.ps-2 { padding-inline-start: var(--spacing-sm) !important; }
+.pe-2 { padding-inline-end: var(--spacing-sm) !important; }
+.ps-3 { padding-inline-start: var(--spacing-md) !important; }
+.pe-3 { padding-inline-end: var(--spacing-md) !important; }
+.ps-4 { padding-inline-start: var(--spacing-lg) !important; }
+.pe-4 { padding-inline-end: var(--spacing-lg) !important; }
+
+/* ==========================================================================
+   Flex Direction Utilities
+   ========================================================================== */
+
+.flex-row-responsive {
+  display: flex;
+  flex-direction: row;
+}
+
+[dir="rtl"] .flex-row-responsive {
+  flex-direction: row-reverse;
+}
+
+.flex-row-normal {
+  display: flex;
+  flex-direction: row;
+}
+
+/* ==========================================================================
+   Position Utilities for RTL
+   ========================================================================== */
+
+.inset-inline-start-0 { inset-inline-start: 0 !important; }
+.inset-inline-end-0 { inset-inline-end: 0 !important; }
+
+/* For legacy browsers that don't support logical properties */
+[dir="ltr"] .start-0 { left: 0 !important; }
+[dir="rtl"] .start-0 { right: 0 !important; }
+[dir="ltr"] .end-0 { right: 0 !important; }
+[dir="rtl"] .end-0 { left: 0 !important; }
+
+/* ==========================================================================
+   Border Utilities
+   ========================================================================== */
+
+.border-inline-start {
+  border-inline-start: 1px solid var(--border-color);
+}
+
+.border-inline-end {
+  border-inline-end: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   Transform Utilities for Icons/Images
+   ========================================================================== */
+
+.flip-horizontal-rtl {
+  transform: scaleX(1);
+  transition: transform var(--transition-base);
+}
+
+[dir="rtl"] .flip-horizontal-rtl {
+  transform: scaleX(-1);
+}
+
+.rotate-180-rtl {
+  transform: rotate(0deg);
+  transition: transform var(--transition-base);
+}
+
+[dir="rtl"] .rotate-180-rtl {
+  transform: rotate(180deg);
+}
+
+/* ==========================================================================
+   Grid & Flexbox RTL Helpers
+   ========================================================================== */
+
+.grid-flow-responsive {
+  display: grid;
+  grid-auto-flow: dense;
+}
+
+[dir="rtl"] .grid-flow-responsive {
+  direction: rtl;
+}
+
+.gap-x-responsive {
+  gap: 0 var(--spacing-md);
+}
+
+/* ==========================================================================
+   Number & Currency Display
+   ========================================================================== */
+
+.numeric-ltr {
+  direction: ltr !important;
+  text-align: start;
+  display: inline-block;
+}
+
+[dir="rtl"] .numeric-ltr {
+  text-align: end;
+}
+
+/* ==========================================================================
+   Component-Specific RTL Overrides
+   ========================================================================== */
+
+/* Dropdown Menus */
+[dir="rtl"] .dropdown-menu {
+  right: 0;
+  left: auto;
+  text-align: start;
+}
+
+[dir="ltr"] .dropdown-menu {
+  left: 0;
+  right: auto;
+  text-align: start;
+}
+
+/* Bootstrap Overrides for RTL */
+[dir="rtl"] .navbar-nav {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .breadcrumb {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+[dir="rtl"] .list-group {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+/* Form Controls */
+[dir="rtl"] .form-check {
+  padding-right: 1.5rem;
+  padding-left: 0;
+}
+
+[dir="rtl"] .form-check-input {
+  margin-right: -1.5rem;
+  margin-left: 0;
+}
+
+[dir="rtl"] .form-switch .form-check-input {
+  margin-right: -2.5rem;
+}
+
+/* Modal */
+[dir="rtl"] .modal-header .btn-close {
+  margin: -0.5rem auto -0.5rem -0.5rem;
+}
+
+/* Pagination */
+[dir="rtl"] .pagination {
+  direction: ltr; /* Keep pagination numbers LTR even in RTL */
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+/* Screen reader only text that respects direction */
+.sr-only-rtl {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   Debug Helpers (Remove in Production)
+   ========================================================================== */
+
+/* Uncomment to visualize RTL/LTR boundaries during development */
+/*
+[dir="rtl"] * {
+  outline: 1px solid rgba(255, 0, 0, 0.1);
+}
+
+[dir="ltr"] * {
+  outline: 1px solid rgba(0, 0, 255, 0.1);
+}
+*/

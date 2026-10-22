@@ -1,0 +1,176 @@
+/* ==========================================================================
+   Global CSS Variables - Single Source of Truth
+   ========================================================================== */
+
+:root {
+  /* ===== Color Palette ===== */
+  /* Primary Colors */
+  --color-primary: #3D853C;
+  --color-primary-dark: #224921;
+  --color-primary-light: #ECF3EC;
+  --color-primary-lighter: #F8FFF8;
+  
+  /* Secondary Colors */
+  --color-secondary: #6c757d;
+  --color-accent: #FB6487;
+  
+  /* UI Colors */
+  --color-success: #28a745;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #17a2b8;
+  
+  /* Neutral Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-dark: #343a40;
+  --color-light: #f8f9fa;
+  
+  /* Text Colors */
+  --text-primary: #224921;
+  --text-secondary: #6F816E;
+  --text-muted: #9FAB9E;
+  --text-white: #ffffff;
+  --text-dark: #212529;
+  
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-green-light: #ECF3EC;
+  --bg-green-lighter: #F0F8F0;
+  --bg-dark: #343a40;
+  
+  /* Border Colors */
+  --border-color: #C3D9C3;
+  --border-color-light: #ECF3EC;
+  --border-color-dark: #9FAB9E;
+  
+  /* ===== Typography ===== */
+  --font-family-primary: 'El Messiri', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-family-secondary: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 2rem;        /* 32px */
+  --font-size-4xl: 3rem;        /* 48px */
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  
+  /* ===== Spacing ===== */
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+  
+  /* ===== Border Radius ===== */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 15px;
+  --radius-full: 9999px;
+  
+  /* ===== Shadows ===== */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 8px 16px rgba(34, 73, 33, 0.1);
+  --shadow-xl: 0 16px 32px rgba(34, 73, 33, 0.15);
+  
+  /* ===== Transitions ===== */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-base: 0.3s ease-in-out;
+  --transition-slow: 0.5s ease-in-out;
+  
+  /* ===== Breakpoints (for reference in JS) ===== */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1400px;
+  
+  /* ===== Z-Index Scale ===== */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+  --z-index-toast: 9999;
+  
+  /* ===== Component-Specific ===== */
+  --navbar-height: 80px;
+  --footer-height: auto;
+  --sidebar-width: 280px;
+  --card-padding: var(--spacing-lg);
+  --button-height: 40px;
+  --input-height: 40px;
+  
+  /* ===== Product Card ===== */
+  --product-card-width: 350px;
+  --product-image-height: 280px;
+  --favorite-btn-size: 36px;
+  --badge-size: 16px;
+}
+
+/* ==========================================================================
+   Responsive Typography Adjustments
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --font-size-xs: 0.688rem;     /* 11px */
+    --font-size-sm: 0.813rem;     /* 13px */
+    --font-size-base: 0.875rem;   /* 14px */
+    --font-size-lg: 1rem;         /* 16px */
+    --font-size-xl: 1.125rem;     /* 18px */
+    --font-size-2xl: 1.25rem;     /* 20px */
+    --font-size-3xl: 1.5rem;      /* 24px */
+    --font-size-4xl: 2rem;        /* 32px */
+  }
+}
+
+/* ==========================================================================
+   Dark Mode Support (Future Enhancement)
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Uncomment when implementing dark mode */
+    /* --color-primary: #4CAF50; */
+    /* --text-primary: #ffffff; */
+    /* --bg-primary: #1a1a1a; */
+  }
+}
+
+/* ==========================================================================
+   High Contrast Mode Support
+   ========================================================================== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --color-primary: #000000;
+    --text-primary: #000000;
+    --bg-primary: #ffffff;
+    --border-color: #000000;
+  }
+}
