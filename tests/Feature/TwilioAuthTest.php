@@ -20,7 +20,7 @@ class TwilioAuthTest extends TestCase
         Config::set('services.twilio', [
             'sid' => 'test_sid',
             'token' => 'test_token',
-            'whatsapp_from' => 'whatsapp:+14155238886',
+            'from' => 'whatsapp:+14155238886',
             'environment' => 'sandbox',
         ]);
     }

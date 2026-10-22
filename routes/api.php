@@ -44,7 +44,6 @@ Route::group([], function () {
     Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
     Route::get('/categories/{id}/products', [CategoryController::class, 'getProductsByCategory']);
-    Route::get('/categories/{id}/products', [CategoryController::class, 'getProductsByCategory']);
     Route::get('/nav-cats', [CategoryController::class, 'navCats']);
 
     // Cart routes
@@ -139,8 +138,15 @@ Route::group([], function () {
     //     });
     // });
 
-    Route::post('/send-otp', [AuthController::class, 'sendOtp']);
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+    // Authentication routes with rate limiting
+    Route::middleware(['throttle:3,1'])->group(function () {
+        Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+    });
+
+    Route::middleware(['throttle:5,1'])->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+    });
 
 });
+

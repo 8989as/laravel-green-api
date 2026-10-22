@@ -2,6 +2,23 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import Backend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import axios from 'axios';
+
+// Sync with backend locale
+export const syncLocaleWithBackend = async (locale) => {
+    try {
+        // Store in cookie
+        document.cookie = `locale=${locale}; path=/; max-age=${60*60*24*365}`;
+        
+        // Set Accept-Language header for API requests
+        axios.defaults.headers.common['Accept-Language'] = locale;
+        
+        // Change i18next language
+        await i18n.changeLanguage(locale);
+    } catch (error) {
+        console.error('Failed to sync locale:', error);
+    }
+};
 
 const resources = {
   ar: {

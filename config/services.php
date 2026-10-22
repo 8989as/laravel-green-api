@@ -12,9 +12,9 @@ return [
     ],
 
     'twilio' => [
-        'sid' => env('TWILIO_ACCOUNT_SID'),
+        'sid' => env('TWILIO_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
-        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+        'from' => env('TWILIO_FROM'),
         'environment' => env('TWILIO_ENVIRONMENT', 'sandbox'),
     ],
 

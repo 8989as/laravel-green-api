@@ -10,21 +10,22 @@ class TwilioService
 {
     protected $client;
 
-    protected $verifySid;
-
     protected $whatsappFrom;
 
     protected $environment;
 
     public function __construct()
     {
-        $this->client = new Client(
-            config('services.twilio.sid'),
-            config('services.twilio.token')
-        );
-
-        $this->verifySid = config('services.twilio.verify_sid');
-        $this->whatsappFrom = config('services.twilio.whatsapp_from');
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+        
+        if (empty($sid) || empty($token)) {
+            Log::error('Twilio configuration missing: SID or Token not set.');
+            throw new \RuntimeException('Twilio configuration is incomplete. Please check your .env file.');
+        }
+        
+        $this->client = new Client($sid, $token);
+        $this->whatsappFrom = config('services.twilio.from');
         $this->environment = config('services.twilio.environment', 'sandbox');
 
         // Log configuration for debugging
@@ -82,10 +83,11 @@ class TwilioService
             );
 
             // Send WhatsApp message using Twilio Messages API
+            $from = $this->whatsappFrom ?? config('services.twilio.from');
             $message = $this->client->messages->create(
                 'whatsapp:'.$phoneNumber, // Production requires whatsapp: prefix
                 [
-                    'from' => $this->whatsappFrom,
+                    'from' => $from,
                     'body' => "Your OTP is: {$otp}. Please enter this code to verify your account.",
                 ]
             );
@@ -132,10 +134,11 @@ class TwilioService
             );
 
             // Send WhatsApp message using Twilio Messages API
+            $from = $this->whatsappFrom ?? config('services.twilio.from');
             $message = $this->client->messages->create(
                 'whatsapp:'.$phoneNumber, // Both from and to need whatsapp: prefix
                 [
-                    'from' => $this->whatsappFrom,
+                    'from' => $from,
                     'body' => "Your OTP is: {$otp}. This is a test message from sandbox environment.",
                 ]
             );
@@ -180,8 +183,14 @@ class TwilioService
                 return $this->verifySandboxOTP($to, $code);
             }
 
-            // For production, use Verify API
-            $verificationCheck = $this->client->verify->v2->services($this->verifySid)
+            // For production, use Verify API if verify_sid is configured
+            $verifySid = config('services.twilio.verify_sid');
+            if (empty($verifySid)) {
+                Log::error('Twilio Verify SID not configured. Cannot verify OTP in production mode.');
+                return false;
+            }
+            
+            $verificationCheck = $this->client->verify->v2->services($verifySid)
                 ->verificationChecks
                 ->create([
                     'to' => $to,
